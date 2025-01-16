@@ -6,7 +6,7 @@ import java.awt.*;
 public class FallingObject extends JPanel {
     private int x,y,speed;
     private ImageIcon image;
-    JLabel imgLabel;
+    public JLabel imgLabel;
     private URL imgUrl;
 
     public FallingObject(JPanel panel, String imgPath){
@@ -23,11 +23,10 @@ public class FallingObject extends JPanel {
 
         System.out.println(imgUrl);
 
-
         imgLabel = new JLabel(image);
         imgLabel.setSize(80, 80); // Set size of JLabel
         panel.add(imgLabel);
-        imgLabel.setVisible(true);
+        imgLabel.setVisible(false);
     }
 
     public void update(){
@@ -50,5 +49,17 @@ public class FallingObject extends JPanel {
     // Remove the JLabel from the panel
     void remove(JPanel panel) {
         panel.remove(imgLabel);
+    }
+
+    void setup(){
+        imgLabel.setVisible(true);
+    }
+
+    public int getY(){
+        return y;
+    }
+
+    public int getX(){
+        return x;
     }
 }

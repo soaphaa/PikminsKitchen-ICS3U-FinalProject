@@ -32,7 +32,7 @@ public class Game extends JFrame implements ActionListener,KeyListener{
     // GUI JFrame
     JFrame frame;
     JPanel p1, p2, p3, p4, p5, p6, p7;
-    JLabel title, aON, aOFF, bg1, basket, fallingObject, highscore;
+    static JLabel title, aON, aOFF, bg1, basket, fallingObject, highscore;
     JButton start, quit, settings, hs, audio, back, recipe1, startRecipe, exitRecipe, next;
     ImageIcon titleIcon, audioOn, audioOff, recipeBg, pikminIcon, ingredientIcon;
     static URL titleURL, audioUrl, audio2Url, bg1Url, pikminUrl, ingredientUrl;
@@ -256,17 +256,13 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         p7.setBounds(0, 0, 1000, 800);
         p7.setBackground(Color.GREEN);
 
-        fog = new FallingObjectsGame(p7);
-        //fog.spawnFallingObject();
-
         pb = new JProgressBar(0, 100); //score progress bar
         pb.setValue(0);
         pb.setStringPainted(false);  // Don't show percentage on bar
-        int currentValue = pb.getValue();
         pb.setBounds(25,10,950,10);
         p7.add(pb);
 
-        // Initialize basket (pikmin icon)
+        // Initialize basket
         pikminUrl = Game.class.getResource("images/pikminFront.png"); // dimensions: 35x55
         pikminIcon = new ImageIcon(pikminUrl);
         Image pikminFrontV2 = pikminIcon.getImage().getScaledInstance(175, 276, Image.SCALE_SMOOTH);
@@ -275,6 +271,18 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         basket = new JLabel(pikminIcon);
         basket.setSize(175,276);
         basket.setLocation(p.getpX(), p.getpY());
+
+        fog = new FallingObjectsGame(p7, basket);
+
+
+//            p.incHighscore();
+//            pb.setValue(p.getHighscore()); //Increase the score bar
+//            hasCollided = true; //mark as collided
+//
+//            if(pb.getValue() >=100){
+//                break;
+//            }
+//        }
 
         // Timer for falling object animation
 //        timer = new Timer(50, new ActionListener() {
@@ -318,7 +326,6 @@ public class Game extends JFrame implements ActionListener,KeyListener{
 
         System.out.println(p.getHighscore());
         // Initial random X position for the falling object
-
 
         // Add components to the panel
         p7.add(basket);
