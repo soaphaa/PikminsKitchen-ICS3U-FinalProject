@@ -9,29 +9,15 @@ public class FallingObject extends JPanel {
     public JLabel imgLabel;
     private URL imgUrl;
 
-    public FallingObject(JPanel panel, String imgPath){
+    public FallingObject(JPanel panel){
         System.out.println("new falling Object created");
         this.x = (int)(Math.random() * (panel.getWidth() - 80)); // Randomize X position
         this.y = 0; // Start at the top
         this.speed = 20; // fixed falling speed of 20
-
-        // Load the image
-        imgUrl = Game.class.getResource(imgPath);
-        image = new ImageIcon(imgUrl);
-        Image scaledImage = image.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
-        image = new ImageIcon(scaledImage);
-
-        System.out.println(imgUrl);
-
-        imgLabel = new JLabel(image);
-        imgLabel.setSize(80, 80); // Set size of JLabel
-        panel.add(imgLabel);
-        imgLabel.setVisible(false);
     }
 
     public void update(){
         y += speed;
-        System.out.println("x: " + x + "y:" + y);
         imgLabel.setVisible(true);
         imgLabel.setLocation(x,y);
     }
@@ -53,6 +39,25 @@ public class FallingObject extends JPanel {
 
     void setup(){
         imgLabel.setVisible(true);
+    }
+
+    void setPath(String imgPath){
+        // Load the image
+        imgUrl = Game.class.getResource(imgPath);
+        image = new ImageIcon(imgUrl);
+        Image scaledImage = image.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
+        image = new ImageIcon(scaledImage);
+        imgLabel = new JLabel(image);
+    }
+
+    void setImg(JPanel panel){
+        imgLabel.setSize(80, 80); // Set size of JLabel
+        panel.add(imgLabel);
+        imgLabel.setVisible(false);
+    }
+
+    URL getPath(){
+        return imgUrl;
     }
 
     public int getY(){
