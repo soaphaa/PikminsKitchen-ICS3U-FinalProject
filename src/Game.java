@@ -45,6 +45,9 @@ public class Game extends JFrame implements ActionListener,KeyListener{
     Step chop,stir,cut,bake;
     Ingredient flour, milk, eggs, chocolateChips, sugar;
 
+    //game stage
+    int gameStage;
+
 
     public void setMessage(String m) {
         message = m;
@@ -67,6 +70,8 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         frame.setVisible(true);
 
         p = new Player(500);
+
+        gameStage = 0;
 
         this.titlescreen();
 
@@ -263,6 +268,8 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         p7 = new JPanel(null);
         p7.setBounds(0, 0, 1000, 800);
 
+        gameStage = 1;
+
         //screen background
         miniGameBGUrl = Game.class.getResource("images/miniGamebackground.png");
         BgIcon = new ImageIcon(miniGameBGUrl);
@@ -290,9 +297,9 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         p7.add(basket);
         //p7.add(bg2);
 
-        //Ensure frame gets focus to listen to key events
-        frame.setFocusable(true);
-        frame.requestFocusInWindow();  // Request focus on the frame
+//        //Ensure frame gets focus to listen to key events
+//        frame.setFocusable(true);
+//        frame.requestFocusInWindow();  // Request focus on the frame
 
         // Refresh the panel and frame layout
         frame.getContentPane().removeAll();
@@ -301,6 +308,10 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         frame.repaint();
         frame.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works.
 
+    }
+
+    public void mix(){
+        gameStage = 2;
     }
 
     @Override
@@ -342,7 +353,7 @@ public class Game extends JFrame implements ActionListener,KeyListener{
             Recipe cookies = new Recipe("cookies", r1Steps, r1Ingredients);
 
             r1Steps.add(cut = new Chop());
-            r1Steps.add(stir = new Stir());
+            r1Steps.add(stir = new Mix());
             r1Steps.add(bake = new Bake());
 
             r1Ingredients.add(flour = new Ingredient("flour"));
@@ -360,30 +371,40 @@ public class Game extends JFrame implements ActionListener,KeyListener{
     }
 
     public void keyPressed(KeyEvent e){
-        if (e.getKeyCode() == KeyEvent.VK_LEFT){
-            if(p7.isVisible()) {
-                pikminUrl = Game.class.getResource("images/pikminLeft.png"); // dimensions: 35x55
-                basket.setIcon(pikminIcon);
-                p.moveL();
-                basket.setLocation(p.getpX(),p.getpY());
-            }
-        }
-        if(e.getKeyCode() == KeyEvent.VK_RIGHT){
-            if(p7.isVisible()){
 
-                pikminUrl = Game.class.getResource("images/pikminRight.png"); // dimensions: 35x55
-                basket.setIcon(pikminIcon);
-                p.moveR();
-                basket.setLocation(p.getpX(),p.getpY());
-            }
-        }
-        if(e.getKeyCode() == KeyEvent.VK_A){
-            System.out.println("Pressed in GAME");
-            if(fog!=null) {
-                fog.pause();
-            }
+        switch(gameStage){
+            case 1:
+                if (e.getKeyCode() == KeyEvent.VK_LEFT){
+                    if(p7.isVisible()) {
+                        pikminUrl = Game.class.getResource("images/pikminLeft.png"); // dimensions: 35x55
+                        basket.setIcon(pikminIcon);
+                        p.moveL();
+                        basket.setLocation(p.getpX(),p.getpY());
+                    }
+                }
+                if(e.getKeyCode() == KeyEvent.VK_RIGHT){
+                    if(p7.isVisible()){
 
+                        pikminUrl = Game.class.getResource("images/pikminRight.png"); // dimensions: 35x55
+                        basket.setIcon(pikminIcon);
+                        p.moveR();
+                        basket.setLocation(p.getpX(),p.getpY());
+                    }
+                }
+                if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+                    System.out.println("ESC pressed");
+                    if(fog!=null) {
+                        fog = null;
+                        System.gc();
+                    }
+                    titlescreen();
+                }
+                break;
+            case 2:
+                System.out.println("In stage 2");
+                break;
         }
+
 
     }
 

@@ -46,6 +46,9 @@ public class FallingObjectsGame {
 
         FallingObject obj = new FallingObject(panel, imgPath); //default, first object
         fallingObjects.add(obj);
+        panel.setFocusable(true);
+
+
 
         timer = new Timer(35, new ActionListener(){
 
@@ -64,6 +67,7 @@ public class FallingObjectsGame {
             }
         });
         spawningTimer.start();
+
     }
 
     public FallingObject getFallingObject(int index) {
@@ -140,7 +144,7 @@ public class FallingObjectsGame {
     }
 
 //    public void keyPressed(KeyEvent e){
-//        if(e.getKeyCode() == KeyEvent.VK_A){
+//        if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
 //            escPressed = true;
 //            System.out.println("Pressed in minigame");
 //            timer.stop();
