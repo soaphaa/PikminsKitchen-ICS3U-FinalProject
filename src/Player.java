@@ -3,6 +3,10 @@ public class Player {
     private int pY;
     private int pX;
 
+    public Player(){
+        this(500);
+    }
+
     public Player(int x_){
         highscore = 0;
         pX = x_;
@@ -31,13 +35,13 @@ public class Player {
 
     public void moveL(){
         if (pX>=100){
-            pX-=50;
+            pX-=10;
         }
     }
 
     public void moveR(){
         if(pX<=700){
-            pX+=50;
+            pX+=10;
         }
     }
 

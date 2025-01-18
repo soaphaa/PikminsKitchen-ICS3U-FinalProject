@@ -4,7 +4,26 @@ import java.awt.*;
 public class Main{
     public static void main(String[] args) {
         Game game = new Game();
-        game.recipe1();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //        Recipe pancakeRecipe = new Recipe("Pancakes");
 //        pancakeRecipe.addStep(new Chop());
 //        pancakeRecipe.addStep(new Stir());

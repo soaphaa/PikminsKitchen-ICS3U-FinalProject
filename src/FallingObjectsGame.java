@@ -4,9 +4,9 @@ import java.awt.event.*;
 import javax.swing.Timer;
 /////// Manages and updates the multiple FallingObject objects ///////
 
-public class FallingObjectsGame extends JPanel implements KeyListener{
+public class FallingObjectsGame {
     private JFrame frame;
-    private JPanel panel;
+    private JPanel panel, goToNext;
     private JLabel basket_;
     private int score; // highscore counter
     private Player p_;
@@ -22,6 +22,7 @@ public class FallingObjectsGame extends JPanel implements KeyListener{
 
     public FallingObjectsGame(JPanel p, JLabel b, Player person, JFrame mainGame){
         panel = p;
+        //goToNext = n; //the panel that will be displayed once this minigame is complete, returning back to the Game class
         basket_ = b;
         score = 0;
         escPressed = false;
@@ -133,21 +134,27 @@ public class FallingObjectsGame extends JPanel implements KeyListener{
         return score;
     }
 
-    public void keyPressed(KeyEvent e){
-        if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
-            escPressed = true;
-            timer.stop();
-            spawningTimer.stop();
-        }
-
+    public void pause(){
+        timer.stop();
+        spawningTimer.stop();
     }
 
-    @Override
-    public void keyTyped(KeyEvent e){
-
-    }
-
-    @Override public void keyReleased(KeyEvent e){
-
-    }
+//    public void keyPressed(KeyEvent e){
+//        if(e.getKeyCode() == KeyEvent.VK_A){
+//            escPressed = true;
+//            System.out.println("Pressed in minigame");
+//            timer.stop();
+//            spawningTimer.stop();
+//        }
+//
+//    }
+//
+//    @Override
+//    public void keyTyped(KeyEvent e){
+//
+//    }
+//
+//    @Override public void keyReleased(KeyEvent e){
+//
+//    }
 }

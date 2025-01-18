@@ -68,6 +68,10 @@ public class Game extends JFrame implements ActionListener,KeyListener{
 
         p = new Player(500);
 
+        this.titlescreen();
+
+        frame.addKeyListener(this);  // Add key listener to the frame
+
         //highscores File I/O
         File highscoreFile = new File ("highscore.txt");
     }
@@ -87,6 +91,7 @@ public class Game extends JFrame implements ActionListener,KeyListener{
 //        return content.toString();
 //    }
 
+    //flashscreen
     public void titlescreen(){
         p1 = new JPanel();
         p1.setLayout(null);
@@ -171,6 +176,7 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         // Revalidate and repaint to ensure changes are displayed
         frame.revalidate(); // Refresh layout
         frame.repaint(); // Redraw frame
+        frame.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works.
 
     }
 
@@ -191,6 +197,7 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         frame.add(p2); //add the new panel
         frame.revalidate(); // Refresh layout
         frame.repaint(); // Redraw frame
+        frame.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works.
     }
 
     public void recipe1(){
@@ -235,6 +242,7 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         frame.add(p3); //add the new panel
         frame.revalidate(); // Refresh layout
         frame.repaint(); // Redraw frame
+        frame.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works.
     }
 
     public void highscorePg(){
@@ -283,7 +291,6 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         //p7.add(bg2);
 
         //Ensure frame gets focus to listen to key events
-        frame.addKeyListener(this);  // Add key listener to the frame
         frame.setFocusable(true);
         frame.requestFocusInWindow();  // Request focus on the frame
 
@@ -292,6 +299,8 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         frame.add(p7);
         frame.revalidate();
         frame.repaint();
+        frame.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works.
+
     }
 
     @Override
@@ -367,6 +376,13 @@ public class Game extends JFrame implements ActionListener,KeyListener{
                 p.moveR();
                 basket.setLocation(p.getpX(),p.getpY());
             }
+        }
+        if(e.getKeyCode() == KeyEvent.VK_A){
+            System.out.println("Pressed in GAME");
+            if(fog!=null) {
+                fog.pause();
+            }
+
         }
 
     }
