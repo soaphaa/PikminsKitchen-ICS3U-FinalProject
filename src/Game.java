@@ -32,10 +32,10 @@ public class Game extends JFrame implements ActionListener,KeyListener{
     // GUI JFrame
     JFrame frame;
     JPanel p1, p2, p3, p4, p5, p6, p7;
-    static JLabel title, aON, aOFF, bg1, basket, fallingObject, highscore;
+    static JLabel title, aON, aOFF, bg1, bg2, basket, fallingObject, highscore;
     JButton start, quit, settings, hs, audio, back, recipe1, startRecipe, exitRecipe, next;
-    ImageIcon titleIcon, audioOn, audioOff, recipeBg, pikminIcon, ingredientIcon;
-    static URL titleURL, audioUrl, audio2Url, bg1Url, pikminUrl, ingredientUrl;
+    ImageIcon titleIcon, audioOn, audioOff, recipeBg, pikminIcon, ingredientIcon, BgIcon;
+    static URL titleURL, audioUrl, audio2Url, bg1Url, pikminUrl, ingredientUrl, miniGameBGUrl;
     JLayeredPane pane1, pane2;
     JProgressBar pb;
 
@@ -254,13 +254,14 @@ public class Game extends JFrame implements ActionListener,KeyListener{
     public void catching(){
         p7 = new JPanel(null);
         p7.setBounds(0, 0, 1000, 800);
-        p7.setBackground(Color.GREEN);
 
-        pb = new JProgressBar(0, 100); //score progress bar
-        pb.setValue(0);
-        pb.setStringPainted(false);  // Don't show percentage on bar
-        pb.setBounds(25,10,950,10);
-        p7.add(pb);
+        //screen background
+        miniGameBGUrl = Game.class.getResource("images/miniGamebackground.png");
+        BgIcon = new ImageIcon(miniGameBGUrl);
+        Image bgv2 = BgIcon.getImage().getScaledInstance(1000,800, Image.SCALE_SMOOTH);
+        BgIcon = new ImageIcon(bgv2);
+        bg2 = new JLabel(BgIcon);
+        bg2.setBounds(0,0,1000,800);
 
         // Initialize basket
         pikminUrl = Game.class.getResource("images/pikminFront.png"); // dimensions: 35x55
@@ -272,65 +273,16 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         basket.setSize(175,276);
         basket.setLocation(p.getpX(), p.getpY());
 
-        fog = new FallingObjectsGame(p7, basket);
+        fog = new FallingObjectsGame(p7, basket, p, frame);
 
-
-//            p.incHighscore();
-//            pb.setValue(p.getHighscore()); //Increase the score bar
-//            hasCollided = true; //mark as collided
-//
-//            if(pb.getValue() >=100){
-//                break;
-//            }
-//        }
-
-        // Timer for falling object animation
-//        timer = new Timer(50, new ActionListener() {
-//
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                fallingObject.setVisible(true);
-//                //pb.setValue(p.getHighscore()*10);
-//
-//                fallingObject.setVisible(true); //return it to visible at the top
-//
-//
-//                if(!hasCollided) {
-//                    iY += 15; //speed the object falls
-//                    if(fallingObject.getBounds().intersects(basket.getBounds())){
-//                        p.incHighscore();
-//                        pb.setValue(p.getHighscore());  // Increase by 10
-//                        hasCollided = true; // Mark as collided
-//                        System.out.println("falling val after collision: " + iY + " basket val " + p.getpY());
-//                        iY = 0;
-//                    }
-//
-//                    if (iY > p7.getHeight()) {  // Check if it goes off the screen
-//                        iY = 0;  // Reset to the top if it falls off the screen
-//                    }
-//
-//                    fallingObject.setLocation(x, iY); // Update the falling object's position
-//                    System.out.println("falling val whenFalling: " + iY + " basket val " + p.getpY());
-//                    fallingObject.setLocation(x,iY);
-//                    basket.setLocation(p.getpX(), p.getpY());
-//                    hasCollided = false;
-//
-//                    if(pb.getValue() >=100){
-//                        fallingObject.setVisible(false);
-//                        System.out.println("You did it! 5/5, JButton Next");
-//                    }
-//                }
-//            }
-//        });
-
-
+        System.out.println("out of the object");
         System.out.println(p.getHighscore());
-        // Initial random X position for the falling object
 
         // Add components to the panel
         p7.add(basket);
+        //p7.add(bg2);
 
-         //Ensure frame gets focus to listen to key events
+        //Ensure frame gets focus to listen to key events
         frame.addKeyListener(this);  // Add key listener to the frame
         frame.setFocusable(true);
         frame.requestFocusInWindow();  // Request focus on the frame
@@ -402,6 +354,7 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         if (e.getKeyCode() == KeyEvent.VK_LEFT){
             if(p7.isVisible()) {
                 pikminUrl = Game.class.getResource("images/pikminLeft.png"); // dimensions: 35x55
+                basket.setIcon(pikminIcon);
                 p.moveL();
                 basket.setLocation(p.getpX(),p.getpY());
             }
@@ -410,6 +363,7 @@ public class Game extends JFrame implements ActionListener,KeyListener{
             if(p7.isVisible()){
 
                 pikminUrl = Game.class.getResource("images/pikminRight.png"); // dimensions: 35x55
+                basket.setIcon(pikminIcon);
                 p.moveR();
                 basket.setLocation(p.getpX(),p.getpY());
             }
