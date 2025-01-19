@@ -1,7 +1,6 @@
 import java.awt.*;
 import javax.swing.*;
 import java.net.*;
-import java.util.Random;
 
 public class Mix extends Step {
 
@@ -16,6 +15,7 @@ public class Mix extends Step {
     JLabel[] notPressed;
 
     // GUI
+    private GameEventListener listener;
     JPanel mPanel, panel;
     URL imgUrl, bgUrl;
     ImageIcon image, bg, seq;
@@ -23,8 +23,9 @@ public class Mix extends Step {
     JLabel[] imgLabel;
     Player p_;
 
-    public Mix(JPanel mainPanel, Player player) {
+    public Mix(JPanel mainPanel, Player player, GameEventListener listener) {
         super("Mixing", player);
+        this.listener = listener;
         mPanel = mainPanel;
         p_ = player;
         bgUrl = Mix.class.getResource("images/miniGameBackground.png");
@@ -56,10 +57,10 @@ public class Mix extends Step {
         pos = -1;
         order = new char[]{'a', 'w', 'd', 's'};
 
-        imagePaths = new String[]{"images/1.png", "images/2.png", "images/3.png", "images/4.png", "images/5.png"};
-        imgLabel = new JLabel[5];
+        imagePaths = new String[]{"images/2.png", "images/3.png", "images/4.png", "images/5.png", "images/messedUp.png", "images/1.png"};
+        imgLabel = new JLabel[6];
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 6; i++) {
             imgUrl = Mix.class.getResource(imagePaths[i]);
             image = new ImageIcon(imgUrl);
             Image scaledImage = image.getImage().getScaledInstance(500, 500, Image.SCALE_SMOOTH);
@@ -69,7 +70,7 @@ public class Mix extends Step {
             imgLabel[i].setLocation(250, 100);
         }
 
-        displayImage(0); // Display the default image at index 0
+        displayImage(5); // Display the default image at index 5
 
         mPanel.add(panel); // Add the panel to the main JFrame in the Game class
         mPanel.revalidate();
@@ -91,18 +92,24 @@ public class Mix extends Step {
             if (order[pos] != keyChar) {
                 // Wrong key pressed, reset position and show an error image (e.g., index 4)
                 pos = -1;
-                displayImage(0); // display the messed up image
+                displayImage(4); // display the messed up image
                 System.out.println("Wrong sequence, try again");
             } else {
                 // Correct key pressed, show the corresponding image
-                displayImage(pos+1); // Show image for the current position
+                displayImage(pos); // Show image for the current position
                 System.out.println("Correct key pressed");
             }
             if (pos == 3) {
                 // Sequence completed successfully
-                p_.incHighscoreDouble();
                 System.out.println("Win! Current high score: " + p_.getHighscore());
                 pos = -2; // Reset to a state where sequence won't continue
+
+                p_.incHighscoreDouble();
+
+                if (listener != null) {
+                    listener.onGameWin(); // Notify the game to show the next panel
+                }
+                return;
             }
         }
     }
