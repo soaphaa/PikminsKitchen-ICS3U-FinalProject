@@ -45,11 +45,12 @@ public class Mix extends Step {
         panel.setFocusable(true);
         panel.setVisible(true);
 
-        URL sequenceUrl = Mix.class.getResource("images/awsd (1).png");
+        URL sequenceUrl = Mix.class.getResource("images/awdsPlain.png");
         seq = new ImageIcon(sequenceUrl);
         Image scaledseq = seq.getImage().getScaledInstance(96, 18, Image.SCALE_SMOOTH);
         seq = new ImageIcon(scaledseq);
         sequenceDisplay = new JLabel(seq);
+        sequenceDisplay.setBounds(100,50,96,18);
         panel.add(sequenceDisplay);
 
         pos = -1;

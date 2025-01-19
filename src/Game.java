@@ -82,7 +82,7 @@ public class Game extends JFrame implements ActionListener,KeyListener{
 
         gameStage = 0;
 
-        this.titlescreen();
+        this.mix();
 
         addKeyListener(this);  // Add key listener to the frame
         //highscores File I/O
