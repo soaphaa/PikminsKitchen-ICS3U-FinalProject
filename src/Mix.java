@@ -16,17 +16,16 @@ public class Mix extends Step {
     JLabel[] notPressed;
 
     // GUI
-    JFrame frame;
-    JPanel panel;
+    JPanel mPanel, panel;
     URL imgUrl, bgUrl;
     ImageIcon image, bg, seq;
     JLabel sequenceDisplay;
     JLabel[] imgLabel;
     Player p_;
 
-    public Mix(JFrame jframe, Player player) {
+    public Mix(JPanel mainPanel, Player player) {
         super("Mixing", player);
-        frame = jframe;
+        mPanel = mainPanel;
         p_ = player;
         bgUrl = Mix.class.getResource("images/miniGameBackground.png");
         bg = new ImageIcon(bgUrl);
@@ -71,17 +70,17 @@ public class Mix extends Step {
 
         displayImage(0); // Display the default image at index 0
 
-        frame.add(panel); // Add the panel to the main JFrame in the Game class
-        frame.revalidate();
-        frame.repaint();
+        mPanel.add(panel); // Add the panel to the main JFrame in the Game class
+        mPanel.revalidate();
+        mPanel.repaint();
     }
 
     public void displayImage(int index) {
         panel.removeAll();
         imgLabel[index].setVisible(true);
         panel.add(imgLabel[index]);
-        frame.revalidate();
-        frame.repaint();
+        mPanel.revalidate();
+        mPanel.repaint();
     }
 
     // Handle the key pressed

@@ -5,8 +5,7 @@ import javax.swing.Timer;
 /////// Manages and updates the multiple FallingObject objects ///////
 
 public class FallingObjectsGame {
-    private JFrame frame;
-    private JPanel panel, goToNext;
+    private JPanel mPanel, panel;
     private JLabel basket_;
     private Player p_;
     public static List<FallingObject> fallingObjects;
@@ -19,13 +18,13 @@ public class FallingObjectsGame {
 
     private Runnable GameEnd;
 
-    public FallingObjectsGame(JPanel p, JLabel b, Player person, JFrame mainGame){
+    public FallingObjectsGame(JPanel p, JLabel b, Player person, JPanel mainPanel){
         panel = p;
+
         //goToNext = n; //the panel that will be displayed once this minigame is complete, returning back to the Game class
         basket_ = b;
         escPressed = false;
         person = new Player();
-        frame = mainGame;
         imgPath = "images/milk.png"; //default
 
         imagePaths = new String[]{"images/egg.png", "images/flour.png", "images/sugar.png", "images/milk.png"};
@@ -121,8 +120,8 @@ public class FallingObjectsGame {
                     timer.stop();
                     spawningTimer.stop();
                     panel.setVisible(false);
-                    frame.revalidate();
-                    frame.repaint();
+                    mPanel.revalidate();
+                    mPanel.repaint();
                 }
             }
         }

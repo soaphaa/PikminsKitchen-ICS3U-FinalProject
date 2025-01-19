@@ -17,9 +17,11 @@ public class Game extends JFrame implements ActionListener,KeyListener{
     final int tile = 16; // 16x16 pixel sprites
     final int tileScale = 3;
     final int tileSize = tile * tileScale; // makes sprites scaled to 48x48
-    final int frameLength = 1000;
-    final int frameWidth = 800;
+    final int mPanelWidth = 1000;
+    final int mPanelHeight = 800;
     boolean isOn = true;
+    private Stack<JPanel> panelStack; // Stack to track navigation history with settings method
+    JPanel mainPanel;
 
     //player
     Player p;
@@ -29,7 +31,6 @@ public class Game extends JFrame implements ActionListener,KeyListener{
     private boolean hasCollided = false;
 
     // GUI JFrame
-    JFrame frame;
     JPanel p1, p2, p3, p4, p5, p6, p7, nextP;
     static JLabel title, aON, aOFF, bg1, bg2, basket, fallingObject, highscore;
     JButton start, quit, settings, hs, audio, back, recipe1, startRecipe, exitRecipe, next;
@@ -60,21 +61,30 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         message = " ";
 
         // Setting the base Frame
-        frame = new JFrame("Pikmin's Kitchen!");
-        frame.setSize(frameLength, frameWidth);
-        frame.setLayout(null); // Use null layout
-        frame.setLocationRelativeTo(null);
-        frame.setResizable(false);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
+        new JFrame("Pikmin's Kitchen!");
+        setSize(1000, 850);
+        setLayout(null); // Use null layout
+        setLocationRelativeTo(null);
+        setResizable(false);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setVisible(true);
+
+        settings = new JButton("settings");
+        settings.setBounds(950,5,45,45);
+        add(settings);
 
         p = new Player(500);
 
+        mainPanel = new JPanel(null);
+        mainPanel.setBounds(0,50,mPanelWidth, mPanelHeight);
+        mainPanel.setVisible(true);
+        add(mainPanel);
+
         gameStage = 0;
 
-        this.mix();
+        this.titlescreen();
 
-        frame.addKeyListener(this);  // Add key listener to the frame
+        addKeyListener(this);  // Add key listener to the frame
         //highscores File I/O
         File highscoreFile = new File ("highscore.txt");
     }
@@ -94,16 +104,49 @@ public class Game extends JFrame implements ActionListener,KeyListener{
 //        return content.toString();
 //    }
 
+    private void switchPanel(JPanel newPanel) {
+        mainPanel.removeAll(); // Remove existing components from the main panel
+        mainPanel.add(newPanel); // Add the new panel
+        mainPanel.revalidate(); // Refresh layout
+        mainPanel.repaint(); // Redraw frame
+        mainPanel.setFocusable(true);
+        mainPanel.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works.
+    }
+
     public void next(){
         nextP = new JPanel(null);
 
+    }
+
+    private void overlayPanel() {
+        JPanel overlay = new JPanel(null);
+        overlay.setBackground(Color.decode("#d9f1e1"));
+        overlay.setBounds(0, 0, 1000, 800);
+
+        JLabel overlayLabel = new JLabel("Overlay Panel");
+        overlayLabel.setBounds(400, 300, 200, 50);
+        overlay.add(overlayLabel);
+
+        JButton backButton = new JButton("Back");
+        backButton.setBounds(400, 400, 200, 50);
+        backButton.addActionListener(e -> {
+            if (!panelStack.isEmpty()) {
+                JPanel previousPanel = panelStack.pop();
+                switchPanel(previousPanel);
+            }
+        });
+        overlay.add(backButton);
+
+        // Push current panel to the stack before switching to overlay
+        panelStack.push((JPanel) mainPanel.getComponent(0));
+        switchPanel(overlay);
     }
 
     //flashscreen
     public void titlescreen(){
         p1 = new JPanel();
         p1.setLayout(null);
-        p1.setSize(frameLength,frameWidth);
+        p1.setSize(mPanelWidth,mPanelHeight);
         p1.setBackground(Color.decode("#d9e1f1"));
         titleURL = Game.class.getResource("images/pikminsTitlescreen.png");
         if (titleURL != null) {
@@ -112,7 +155,7 @@ public class Game extends JFrame implements ActionListener,KeyListener{
             titleIcon = new ImageIcon(titlev2);
         }
         title = new JLabel(titleIcon);
-        title.setBounds(0,0,frameLength,frameWidth);
+        title.setBounds(0,0,mPanelWidth,mPanelHeight);
         p1.add(title);
 
         start = new JButton();
@@ -178,14 +221,7 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         p1.add(hs);
         p1.add(audio);
 
-
-        frame.getContentPane().removeAll(); // Remove existing content
-        frame.add(p1);
-        // Revalidate and repaint to ensure changes are displayed
-        frame.revalidate(); // Refresh layout
-        frame.repaint(); // Redraw frame
-        frame.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works.
-
+        switchPanel(p1);
     }
 
     public void recipeList(){
@@ -200,12 +236,7 @@ public class Game extends JFrame implements ActionListener,KeyListener{
 
         p2.add(recipe1);
 
-        // Revalidate and repaint to ensure changes are displayed
-        frame.getContentPane().removeAll(); // Remove existing content
-        frame.add(p2); //add the new panel
-        frame.revalidate(); // Refresh layout
-        frame.repaint(); // Redraw frame
-        frame.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works.
+        switchPanel(p2);
     }
 
     public void recipe1(){
@@ -246,11 +277,7 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         p3.add(startRecipe);
         p3.add(exitRecipe);
 
-        frame.getContentPane().removeAll(); // Remove existing content
-        frame.add(p3); //add the new panel
-        frame.revalidate(); // Refresh layout
-        frame.repaint(); // Redraw frame
-        frame.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works.
+        switchPanel(p3);
     }
 
     public void highscorePg(){
@@ -259,12 +286,7 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         p5.setBackground(Color.GREEN);
         highscore = new JLabel();
 
-        frame.add(p5);
-    }
-
-    public void settings(){
-        p6 = new JPanel(null);
-
+        switchPanel(p5);
     }
 
     public void catching(){
@@ -300,7 +322,7 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         basket.setLocation(p.getpX(), p.getpY());
 
 
-        fog = new FallingObjectsGame(p7, basket, p, frame);
+        fog = new FallingObjectsGame(p7, basket, p, mainPanel);
 
         System.out.println("out of the object");
          //doesnt work :(
@@ -310,34 +332,19 @@ public class Game extends JFrame implements ActionListener,KeyListener{
 
         // Add components to the panel
         p7.add(basket);
-        //p7.add(bg2);
 
-//        //Ensure frame gets focus to listen to key events
-//        frame.setFocusable(true);
-//        frame.requestFocusInWindow();  // Request focus on the frame
-
-        // Refresh the panel and frame layout
-        frame.getContentPane().removeAll();
-        frame.add(p7);
-        frame.revalidate();
-        frame.repaint();
-        frame.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works.
-
+        switchPanel(p7);
     }
-
-
 
     public void mix(){
         gameStage = 2;
 
-        frame.getContentPane().removeAll();
-
-        mixGame = new Mix(frame, p);
+        mixGame = new Mix(mainPanel, p);
         r1Steps.add(mixGame);
 
-        frame.revalidate();
-        frame.repaint();
-        frame.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works
+        mainPanel.revalidate();
+        mainPanel.repaint();
+        mainPanel.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works
     }
 
     @Override
