@@ -45,6 +45,7 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
     ArrayList<Step> r1Steps = new ArrayList<>();
     ArrayList<Ingredient> r1Ingredients = new ArrayList<>();
     Mix mixGame;
+    Bake bakeGame;
     Ingredient flour, milk, eggs, chocolateChips, sugar;
 
     //game stage
@@ -75,7 +76,7 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         mainPanel.setBackground(Color.LIGHT_GRAY);
         layeredPane.add(mainPanel, JLayeredPane.DEFAULT_LAYER);
 
-        msgPaths = new String[]{"images/catchingMessage.png", "images/catchingMessage.png", "images/catchingMessage.png"};
+        msgPaths = new String[]{"images/catchingMessage.png", "images/msgMix.png", "images/msgBake.png"};
         msgLabels = new JLabel[msgPaths.length];
         URL msgUrl;
         ImageIcon msgImg;
@@ -86,7 +87,7 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
             Image scaledImage = msgImg.getImage().getScaledInstance(1000, 200, Image.SCALE_SMOOTH);
             msgImg = new ImageIcon(scaledImage);
             msgLabels[i] = new JLabel(msgImg);
-            msgLabels[i].setSize(1000, 200);
+            msgLabels[i].setSize(200, 200);
         }
 
         //pause button
@@ -107,7 +108,7 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
         panelStack = new Stack<>();
 
-        this.mix();
+        this.bake();
 
         addKeyListener(this);  // Add key listener to the frame
         //highscores File I/O
@@ -116,6 +117,7 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
     public void setMsg(int index, JPanel p) {
         p.add(msgLabels[index]);
+        msgLabels[index].setLocation(0,50);
     }
 
 //    //method to read file
@@ -503,8 +505,10 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         p.resetLives();
 
         mainPanel.removeAll();
+        bakeGame = new Bake(mainPanel, p);
         mainPanel.revalidate();
         mainPanel.repaint();
+        mainPanel.addKeyListener(this);
         mainPanel.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works
     }
 
@@ -629,6 +633,11 @@ System.out.println(gameStage);
                 else if (e.getKeyCode() == KeyEvent.VK_D) {
                     mixGame.handleKeyPress('d');
                     System.out.println("d pressed");
+                }
+            case 3:
+                if(e.getKeyCode() == KeyEvent.VK_SPACE){
+                    bakeGame.stopTimer();
+                    System.out.println("space pressed");
                 }
 
         }
