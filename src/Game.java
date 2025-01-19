@@ -30,7 +30,7 @@ public class Game extends JFrame implements ActionListener,KeyListener{
 
     // GUI JFrame
     JFrame frame;
-    JPanel p1, p2, p3, p4, p5, p6, p7;
+    JPanel p1, p2, p3, p4, p5, p6, p7, nextP;
     static JLabel title, aON, aOFF, bg1, bg2, basket, fallingObject, highscore;
     JButton start, quit, settings, hs, audio, back, recipe1, startRecipe, exitRecipe, next;
     ImageIcon titleIcon, audioOn, audioOff, recipeBg, pikminIcon, ingredientIcon, BgIcon;
@@ -72,7 +72,7 @@ public class Game extends JFrame implements ActionListener,KeyListener{
 
         gameStage = 0;
 
-        this.titlescreen();
+        this.mix();
 
         frame.addKeyListener(this);  // Add key listener to the frame
         //highscores File I/O
@@ -93,6 +93,11 @@ public class Game extends JFrame implements ActionListener,KeyListener{
 //        }
 //        return content.toString();
 //    }
+
+    public void next(){
+        nextP = new JPanel(null);
+
+    }
 
     //flashscreen
     public void titlescreen(){
@@ -263,18 +268,26 @@ public class Game extends JFrame implements ActionListener,KeyListener{
     }
 
     public void catching(){
-        p7 = new JPanel(null);
-        p7.setBounds(0, 0, 1000, 800);
-
         gameStage = 1;
 
         //screen background
         miniGameBGUrl = Game.class.getResource("images/miniGamebackground.png");
         BgIcon = new ImageIcon(miniGameBGUrl);
         Image bgv2 = BgIcon.getImage().getScaledInstance(1000,800, Image.SCALE_SMOOTH);
-        BgIcon = new ImageIcon(bgv2);
-        bg2 = new JLabel(BgIcon);
-        bg2.setBounds(0,0,1000,800);
+//        BgIcon = new ImageIcon(bgv2);
+//        bg2 = new JLabel(BgIcon);
+//        bg2.setBounds(0,0,1000,800);
+
+        p7 = new JPanel(null) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                // Draw the image
+                g.drawImage(bgv2, 0, 0, 1000, 800, this);
+            }
+        };
+
+        p7.setBounds(0, 0, 1000, 800);
 
         // Initialize basket
         pikminUrl = Game.class.getResource("images/pikminFront.png"); // dimensions: 35x55
@@ -286,10 +299,14 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         basket.setSize(175,276);
         basket.setLocation(p.getpX(), p.getpY());
 
+
         fog = new FallingObjectsGame(p7, basket, p, frame);
 
         System.out.println("out of the object");
-        System.out.println(p.getHighscore());
+         //doesnt work :(
+        if(p.getHighscore() >=100) {
+            mix();
+        }
 
         // Add components to the panel
         p7.add(basket);
@@ -308,16 +325,19 @@ public class Game extends JFrame implements ActionListener,KeyListener{
 
     }
 
+
+
     public void mix(){
         gameStage = 2;
 
-        mixGame = new Mix(frame);
+        frame.getContentPane().removeAll();
+
+        mixGame = new Mix(frame, p);
         r1Steps.add(mixGame);
 
-        frame.getContentPane().removeAll();
         frame.revalidate();
         frame.repaint();
-        frame.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works.
+        frame.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works
     }
 
     @Override
@@ -397,6 +417,7 @@ public class Game extends JFrame implements ActionListener,KeyListener{
                         basket.setLocation(p.getpX(), p.getpY());
                     }
                 }
+
                 if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     System.out.println("ESC pressed");
                     if (fog != null) {
@@ -409,22 +430,18 @@ public class Game extends JFrame implements ActionListener,KeyListener{
             case 2:
                 if (e.getKeyCode() == KeyEvent.VK_A) {
                     mixGame.handleKeyPress('a');
-                    mixGame.displayImage(1);
                     System.out.println("a pressed");
                 }
-                if (e.getKeyCode() == KeyEvent.VK_W) {
+                else if (e.getKeyCode() == KeyEvent.VK_W) {
                     mixGame.handleKeyPress('w');
-                    mixGame.displayImage(2);
                     System.out.println("w pressed");
                 }
-                if (e.getKeyCode() == KeyEvent.VK_S) {
+                else if (e.getKeyCode() == KeyEvent.VK_S) {
                     mixGame.handleKeyPress('s');
-                    mixGame.displayImage(3);
                     System.out.println("s pressed");
                 }
-                if (e.getKeyCode() == KeyEvent.VK_D) {
+                else if (e.getKeyCode() == KeyEvent.VK_D) {
                     mixGame.handleKeyPress('d');
-                    mixGame.displayImage(4);
                     System.out.println("d pressed");
                 }
 

@@ -1,5 +1,11 @@
+import javax.swing.*;
+
 public class Bake extends Step{
-    public Bake(){
-        super("Baking");
+    JFrame frame;
+    Player p_;
+
+    public Bake(JFrame jframe, Player player){
+        super("Baking", player);
+        p_ = player;
     }
 }

@@ -25,6 +25,10 @@ public class Player {
         highscore+=10;
     }
 
+    public void incHighscoreDouble(){
+        highscore+=20;
+    }
+
     public int getpX(){
         return pX;
     }

@@ -137,22 +137,4 @@ public class FallingObjectsGame {
         spawningTimer.stop();
     }
 
-//    public void keyPressed(KeyEvent e){
-//        if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
-//            escPressed = true;
-//            System.out.println("Pressed in minigame");
-//            timer.stop();
-//            spawningTimer.stop();
-//        }
-//
-//    }
-//
-//    @Override
-//    public void keyTyped(KeyEvent e){
-//
-//    }
-//
-//    @Override public void keyReleased(KeyEvent e){
-//
-//    }
 }
