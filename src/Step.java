@@ -6,8 +6,4 @@ public abstract class Step {
         this.stepName = name;
         this.isCompleted = false;
     }
-
-    public void performStep(){
-
-    }
 }

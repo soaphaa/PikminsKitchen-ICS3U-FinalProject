@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.net.*;
 import java.util.*;
-import javax.swing.Timer;
 import java.io.*;
 
 import static javax.swing.BorderFactory.createLineBorder;
@@ -37,12 +36,12 @@ public class Game extends JFrame implements ActionListener,KeyListener{
     ImageIcon titleIcon, audioOn, audioOff, recipeBg, pikminIcon, ingredientIcon, BgIcon;
     static URL titleURL, audioUrl, audio2Url, bg1Url, pikminUrl, ingredientUrl, miniGameBGUrl;
     JLayeredPane pane1, pane2;
-    JProgressBar pb;
+    JProgressBar pb, pb2;
 
     //child class objects
     ArrayList<Step> r1Steps = new ArrayList<>();
     ArrayList<Ingredient> r1Ingredients = new ArrayList<>();
-    Step chop,stir,cut,bake;
+    Mix mixGame;
     Ingredient flour, milk, eggs, chocolateChips, sugar;
 
     //game stage
@@ -76,7 +75,6 @@ public class Game extends JFrame implements ActionListener,KeyListener{
         this.titlescreen();
 
         frame.addKeyListener(this);  // Add key listener to the frame
-
         //highscores File I/O
         File highscoreFile = new File ("highscore.txt");
     }
@@ -312,6 +310,14 @@ public class Game extends JFrame implements ActionListener,KeyListener{
 
     public void mix(){
         gameStage = 2;
+
+        mixGame = new Mix(frame);
+        r1Steps.add(mixGame);
+
+        frame.getContentPane().removeAll();
+        frame.revalidate();
+        frame.repaint();
+        frame.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works.
     }
 
     @Override
@@ -352,9 +358,9 @@ public class Game extends JFrame implements ActionListener,KeyListener{
             //creating the recipe object details
             Recipe cookies = new Recipe("cookies", r1Steps, r1Ingredients);
 
-            r1Steps.add(cut = new Chop());
-            r1Steps.add(stir = new Mix());
-            r1Steps.add(bake = new Bake());
+//            r1Steps.add(cut = new Chop());
+//            r1Steps.add(mix = new Mix(frame));
+//            r1Steps.add(bake = new Bake());
 
             r1Ingredients.add(flour = new Ingredient("flour"));
             r1Ingredients.add(sugar = new Ingredient("sugar"));
@@ -372,28 +378,28 @@ public class Game extends JFrame implements ActionListener,KeyListener{
 
     public void keyPressed(KeyEvent e){
 
-        switch(gameStage){
+        switch(gameStage) {
             case 1:
-                if (e.getKeyCode() == KeyEvent.VK_LEFT){
-                    if(p7.isVisible()) {
+                if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+                    if (p7.isVisible()) {
                         pikminUrl = Game.class.getResource("images/pikminLeft.png"); // dimensions: 35x55
                         basket.setIcon(pikminIcon);
                         p.moveL();
-                        basket.setLocation(p.getpX(),p.getpY());
+                        basket.setLocation(p.getpX(), p.getpY());
                     }
                 }
-                if(e.getKeyCode() == KeyEvent.VK_RIGHT){
-                    if(p7.isVisible()){
+                if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+                    if (p7.isVisible()) {
 
                         pikminUrl = Game.class.getResource("images/pikminRight.png"); // dimensions: 35x55
                         basket.setIcon(pikminIcon);
                         p.moveR();
-                        basket.setLocation(p.getpX(),p.getpY());
+                        basket.setLocation(p.getpX(), p.getpY());
                     }
                 }
-                if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     System.out.println("ESC pressed");
-                    if(fog!=null) {
+                    if (fog != null) {
                         fog = null;
                         System.gc();
                     }
@@ -401,11 +407,28 @@ public class Game extends JFrame implements ActionListener,KeyListener{
                 }
                 break;
             case 2:
-                System.out.println("In stage 2");
-                break;
+                if (e.getKeyCode() == KeyEvent.VK_A) {
+                    mixGame.handleKeyPress('a');
+                    mixGame.displayImage(1);
+                    System.out.println("a pressed");
+                }
+                if (e.getKeyCode() == KeyEvent.VK_W) {
+                    mixGame.handleKeyPress('w');
+                    mixGame.displayImage(2);
+                    System.out.println("w pressed");
+                }
+                if (e.getKeyCode() == KeyEvent.VK_S) {
+                    mixGame.handleKeyPress('s');
+                    mixGame.displayImage(3);
+                    System.out.println("s pressed");
+                }
+                if (e.getKeyCode() == KeyEvent.VK_D) {
+                    mixGame.handleKeyPress('d');
+                    mixGame.displayImage(4);
+                    System.out.println("d pressed");
+                }
+
         }
-
-
     }
 
     @Override

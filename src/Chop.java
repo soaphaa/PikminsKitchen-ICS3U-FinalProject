@@ -4,8 +4,4 @@ public class Chop extends Step{
         super("Chopping");
     }
 
-    @Override
-    public void performStep(){
-        isCompleted = true;
-    }
 }

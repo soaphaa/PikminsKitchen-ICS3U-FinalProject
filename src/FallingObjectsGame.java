@@ -8,7 +8,6 @@ public class FallingObjectsGame {
     private JFrame frame;
     private JPanel panel, goToNext;
     private JLabel basket_;
-    private int score; // highscore counter
     private Player p_;
     public static List<FallingObject> fallingObjects;
     private Timer timer, spawningTimer;
@@ -24,7 +23,6 @@ public class FallingObjectsGame {
         panel = p;
         //goToNext = n; //the panel that will be displayed once this minigame is complete, returning back to the Game class
         basket_ = b;
-        score = 0;
         escPressed = false;
         person = new Player();
         frame = mainGame;
@@ -132,10 +130,6 @@ public class FallingObjectsGame {
         // Revalidate and repaint the panel
         panel.revalidate();
         panel.repaint();
-    }
-
-    public int getScore(){
-        return score;
     }
 
     public void pause(){
