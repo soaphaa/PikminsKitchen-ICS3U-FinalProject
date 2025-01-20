@@ -2,6 +2,7 @@ public class Player {
     private int highscore;
     private int pY;
     private int pX;
+    private int lives;
 
     public Player(){
         this(500);
@@ -11,6 +12,7 @@ public class Player {
         highscore = 0;
         pX = x_;
         pY = 500;
+        lives = 3;
     }
 
     public int getHighscore(){
@@ -25,6 +27,26 @@ public class Player {
         highscore+=10;
     }
 
+    public void incHighscoreDouble(){
+        highscore+=20;
+    }
+
+    public void decreaseHighscore(){
+        highscore-=10;
+    }
+
+    public void decreaseLives(){
+        if(lives >0){
+            System.out.println("GAME OVER!");
+            //use GAME OVER panel in GAME
+        }
+        lives--;
+    }
+
+    public void resetLives(){
+        lives = 3;
+    }
+
     public int getpX(){
         return pX;
     }
@@ -34,13 +56,13 @@ public class Player {
     }
 
     public void moveL(){
-        if (pX>=100){
+        if (pX>=0){
             pX-=10;
         }
     }
 
     public void moveR(){
-        if(pX<=700){
+        if(pX<=800){
             pX+=10;
         }
     }

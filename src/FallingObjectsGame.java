@@ -1,14 +1,16 @@
 import javax.swing.*;
+import java.awt.*;
 import java.util.*;
 import java.awt.event.*;
+import java.util.List;
 import javax.swing.Timer;
+import javax.swing.border.Border;
 /////// Manages and updates the multiple FallingObject objects ///////
 
 public class FallingObjectsGame {
-    private JFrame frame;
-    private JPanel panel, goToNext;
-    private JLabel basket_;
-    private int score; // highscore counter
+    private GameEventListener listener;
+    private JPanel mPanel, panel;
+    private JLabel basket_, message;
     private Player p_;
     public static List<FallingObject> fallingObjects;
     private Timer timer, spawningTimer;
@@ -20,14 +22,13 @@ public class FallingObjectsGame {
 
     private Runnable GameEnd;
 
-    public FallingObjectsGame(JPanel p, JLabel b, Player person, JFrame mainGame){
+    public FallingObjectsGame(JPanel p, JLabel b, Player person, JPanel mainPanel, GameEventListener listener){
         panel = p;
+        this.listener  = listener;
         //goToNext = n; //the panel that will be displayed once this minigame is complete, returning back to the Game class
         basket_ = b;
-        score = 0;
         escPressed = false;
         person = new Player();
-        frame = mainGame;
         imgPath = "images/milk.png"; //default
 
         imagePaths = new String[]{"images/egg.png", "images/flour.png", "images/sugar.png", "images/milk.png"};
@@ -36,7 +37,10 @@ public class FallingObjectsGame {
 
         pb.setValue(0);
         pb.setStringPainted(false);  // Don't show percentage on bar
-        pb.setBounds(25,10,950,10);
+        pb.setBackground(Color.WHITE);
+        pb.setForeground(Color.GREEN);
+        pb.setBorder(BorderFactory.createLineBorder(Color.WHITE, 3)); // White border
+        pb.setBounds(25,10,950,25);
         panel.add(pb);
 
         p_ = person;
@@ -46,6 +50,9 @@ public class FallingObjectsGame {
 
         FallingObject obj = new FallingObject(panel, imgPath); //default, first object
         fallingObjects.add(obj);
+        panel.setFocusable(true);
+
+
 
         timer = new Timer(35, new ActionListener(){
 
@@ -64,6 +71,7 @@ public class FallingObjectsGame {
             }
         });
         spawningTimer.start();
+
     }
 
     public FallingObject getFallingObject(int index) {
@@ -91,6 +99,12 @@ public class FallingObjectsGame {
     }
 
     private void updateObjects() {
+        if (p_.getHighscore() < 0) {
+            p_.setHighscore(0);
+            System.out.println("You lose! Try again");
+            return; // Exit the method if the highscore is invalid
+        }
+
         for (int i = 0; i < fallingObjects.size(); i++) {
             FallingObject obj = fallingObjects.get(i);
             obj.update();
@@ -100,6 +114,7 @@ public class FallingObjectsGame {
                 panel.remove(obj.imgLabel);
                 fallingObjects.remove(i);
                 i--; // Adjust index after removal
+                p_.decreaseHighscore();
                 continue;
             }
 
@@ -118,9 +133,11 @@ public class FallingObjectsGame {
                     System.out.println("You win yay " + p_.getHighscore());
                     timer.stop();
                     spawningTimer.stop();
-                    panel.setVisible(false);
-                    frame.revalidate();
-                    frame.repaint();
+
+                    if (listener != null) {
+                        listener.onGameWin(); // Notify the game to show the next panel
+                    }
+                    return;
                 }
             }
         }
@@ -130,31 +147,17 @@ public class FallingObjectsGame {
         panel.repaint();
     }
 
-    public int getScore(){
-        return score;
-    }
 
-    public void pause(){
+    public void pause() {
         timer.stop();
         spawningTimer.stop();
+        System.out.println("Game paused.");
     }
 
-//    public void keyPressed(KeyEvent e){
-//        if(e.getKeyCode() == KeyEvent.VK_A){
-//            escPressed = true;
-//            System.out.println("Pressed in minigame");
-//            timer.stop();
-//            spawningTimer.stop();
-//        }
-//
-//    }
-//
-//    @Override
-//    public void keyTyped(KeyEvent e){
-//
-//    }
-//
-//    @Override public void keyReleased(KeyEvent e){
-//
-//    }
+    public void resume() {
+        timer.start();
+        spawningTimer.start();
+        System.out.println("Game resumed.");
+    }
+
 }
