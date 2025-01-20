@@ -5,6 +5,7 @@ import java.net.URL;
 public class Bake {
     private JPanel panel, mPanel;
     private Player p_;
+    private FileIO f;
 
     private String[] imgPath;
     private JLabel[] imgLabel;
@@ -17,7 +18,7 @@ public class Bake {
     private Timer timer; // Progress bar timer
     int currentValue;    // Current value of progress bar
 
-    public Bake(JPanel mainPanel, Player player) {
+    public Bake(JPanel mainPanel, Player player, FileIO file) {
         this.mPanel = mainPanel;
         this.p_ = player;
 
@@ -107,7 +108,7 @@ public class Bake {
                 panel.repaint();                // Repaint the panel
             } else {
                 ((Timer) e.getSource()).stop(); // Stop when progress bar is full
-                displayImage(4);
+                displayImage(4); //FAILED
             }
         });
         timer.start();
@@ -124,18 +125,39 @@ public class Bake {
         if (currentValue > 0) {
             if (currentValue <= 55) {
                 displayImage(0);//undercooked
+                bakeScore(0);
             }
             else if(currentValue>=65 && currentValue <=70){
                 displayImage(2);//perfect
+                bakeScore(2);
             }
             else if(currentValue >=81){
                 displayImage(3);//burnt
+                bakeScore(3);
             }
 
             else{
                 displayImage(1);//good
+                bakeScore(1);
             }
-            System.out.println(currentValue);
         }
+    }
+
+    public void bakeScore(int imgIndex){
+        switch(imgIndex){
+            case 0: p_.decreaseScore();
+            case 1: p_.incScore();
+                break;
+            case 2: p_.incScoreDouble();
+            case 3: p_.decreaseScore();
+            case 4: p_.setScore(0);
+        }
+        f.saveScore(p_);
+    }
+
+    //start the game timer
+    public void start() {
+        timer.start();
+        pb.setValue(0); // Start with 0% progress
     }
 }

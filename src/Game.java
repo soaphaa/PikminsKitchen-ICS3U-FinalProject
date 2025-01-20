@@ -13,7 +13,6 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
     // Settings
     final int tile = 16; // 16x16 pixel sprites
     final int tileScale = 3;
-    final int tileSize = tile * tileScale; // makes sprites scaled to 48x48
     final int mPanelWidth = 1000;
     final int mPanelHeight = 800;
     boolean isOn = true;
@@ -22,6 +21,7 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
     //player
     Player p;
+    FileIO fileIO;
 
     // Message displayed
     public static JLabel message;
@@ -30,12 +30,11 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
     //catching items minigame
     FallingObjectsGame fog;
-    private boolean hasCollided = false;
 
     // GUI JFrame
     JPanel p1, p2, p3, p4, p5, p6, p7, nextP, pauseP, gameOverP;
-    static JLabel title, aON, aOFF, bg1, bg2, basket, fallingObject, highscore;
-    JButton start, quit, pause, hs, audio, back, recipe1, startRecipe, exitRecipe, next, tryAgain;
+    static JLabel title, aON, aOFF, bg1, bg2, basket, fallingObject, highscore, tutorialMsg;
+    JButton start, quit, hs, audio, back, home, recipe1, startRecipe, exitRecipe, next, tryAgain;
     ImageIcon titleIcon, audioOn, audioOff, recipeBg, pikminIcon, ingredientIcon, BgIcon;
     static URL titleURL, audioUrl, audio2Url, bg1Url, pikminUrl, ingredientUrl, miniGameBGUrl;
     JProgressBar pb, pb2;
@@ -63,11 +62,13 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
 
-        p = new Player(500);
+        p = new Player(500, this);
 
         // Initialize layered pane
         layeredPane = new JLayeredPane();
         layeredPane.setBounds(0, 0, 1000, 850);
+//        layeredPane.setFocusable(true); // Allow layeredPane to capture key events
+//        layeredPane.requestFocusInWindow(); // focus
         add(layeredPane);
 
         // Initialize mainPanel
@@ -84,56 +85,58 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         for (int i = 0; i < 3; i++) {
             msgUrl = Mix.class.getResource(msgPaths[i]);
             msgImg = new ImageIcon(msgUrl);
-            Image scaledImage = msgImg.getImage().getScaledInstance(1000, 200, Image.SCALE_SMOOTH);
+            Image scaledImage = msgImg.getImage().getScaledInstance(1000, 800, Image.SCALE_SMOOTH);
             msgImg = new ImageIcon(scaledImage);
             msgLabels[i] = new JLabel(msgImg);
-            msgLabels[i].setSize(200, 200);
+            msgLabels[i].setSize(1000, 800);
         }
-
-        //pause button
-        pause = new JButton();
-        URL pauseUrl = Game.class.getResource("images/pause.png");
-        ImageIcon pauseIcon = new ImageIcon(pauseUrl);
-        Image scaledPause = pauseIcon.getImage().getScaledInstance(60,60,Image.SCALE_SMOOTH);
-        pauseIcon = new ImageIcon(scaledPause);
-        pause.setIcon(pauseIcon);
-        pause.setBounds(2,2,65,65);
-        pause.setVisible(true);
-        pause.setBackground(Color.decode("#d4e7fe"));
-        pause.setBorderPainted(false);
-        pause.setFocusable(false);
-        layeredPane.add(pause, JLayeredPane.PALETTE_LAYER); // Add to a higher layer
 
         gameStage = 0;
 
         panelStack = new Stack<>();
 
-        this.bake();
+        this.titlescreen();
 
         addKeyListener(this);  // Add key listener to the frame
-        //highscores File I/O
-        File highscoreFile = new File ("highscore.txt");
+
+        fileIO = new FileIO("highscore.txt"); //new file IO class
+
+        mainPanel.addKeyListener(this); //add key listener once
     }
 
-    public void setMsg(int index, JPanel p) {
-        p.add(msgLabels[index]);
-        msgLabels[index].setLocation(0,50);
+    public void setMsg(int ind1, JPanel p) {
+        // Display the message
+        tutorialMsg = msgLabels[ind1];
+        tutorialMsg.setLocation(0, 0);
+        tutorialMsg.setVisible(true);
+
+        // Add the tutorial message to a higher layer
+        layeredPane.add(tutorialMsg, JLayeredPane.MODAL_LAYER);
+
+        // Set focus on the layeredPane to capture key events
+        layeredPane.setFocusable(true);
+        layeredPane.requestFocusInWindow();
+
+        // Add a KeyListener to the layeredPane
+        layeredPane.addKeyListener(this);
     }
 
-//    //method to read file
-//    private static String readFile(String filePath) {
-//        FileBuilder content = new FileBuilder();
-//        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-//            String line;
-//            while ((line = br.readLine()) != null) {
-//                content.append(line).append("\n");
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            return "Error reading file.";
-//        }
-//        return content.toString();
-//    }
+    private void startCurrentGame(int ind) {
+        // Start the specific game
+        switch (ind) {
+            case 0: // Catching game
+                System.out.println("Starting Catching Game...");
+                fog.start();
+                break;
+            case 1: // Mix game
+                System.out.println("Starting Mix Game...");
+                break;
+            case 2: // Bake game
+                System.out.println("Starting Bake Game...");
+                bakeGame.start();
+                break;
+        }
+    }
 
     private void switchPanel(JPanel newPanel) {
         mainPanel.removeAll(); // Remove existing components from the main panel
@@ -142,7 +145,6 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         mainPanel.repaint(); // Redraw frame
         mainPanel.setFocusable(true);
         mainPanel.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works.
-        mainPanel.addKeyListener(this);
     }
 
 
@@ -190,6 +192,7 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         tryAgain.setOpaque(false);
         tryAgain.setContentAreaFilled(false);
         tryAgain.setBorderPainted(false);
+        tryAgain.setActionCommand("RETRY_STAGE_" + gameStage);
 
         tryAgain.addActionListener(e -> {
             if (!panelStack.isEmpty()) {
@@ -211,91 +214,47 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         layeredPane.revalidate();
     }
 
-    public void pausePanel() {
-        // Remove the existing pause overlay if present
-        if (nextP != null) {
-            layeredPane.remove(nextP);
+    public void gameOver(){
+        if (gameOverP != null) {
+            // If the overlay exists, remove it before recreating
+            layeredPane.remove(gameOverP);
+            if(nextP !=null){
+                layeredPane.remove(gameOverP);
+            }
+
         }
 
-        // Create the pause panel
-        nextP = new JPanel(null);
-        nextP.setBounds(319, 196, 362, 408); // Centered
-        nextP.setBackground(new Color(0, 0, 0, 150)); // Semi-transparent black
+        URL overURL = Game.class.getResource("images/GameOver.png");
+        ImageIcon overIcon = new ImageIcon(overURL);
+        Image resizedGameOverIcon = overIcon.getImage().getScaledInstance(362, 408, Image.SCALE_SMOOTH);
 
-        // Resume Button
-        JButton resumeButton = new JButton("Resume");
-        resumeButton.setBounds(76, 100, 219, 56);
-        resumeButton.addActionListener(e -> {
-            layeredPane.remove(nextP);
-            layeredPane.repaint();
-            fog.resume(); // Resume the FallingObjectsGame
-        });
+        gameOverP = new JPanel(null) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                // Draw the background image
+                g.drawImage(resizedGameOverIcon, 0, 0, 362, 408, this);
+            }
+        };
 
-        // Restart Button
-        JButton restartButton = new JButton("Restart");
-        restartButton.setBounds(76, 180, 219, 56);
-        restartButton.addActionListener(e -> {
-            layeredPane.remove(nextP);
-            layeredPane.repaint();
-            catching(); // Restart the current game
-        });
+        gameOverP.setBounds(319, 196, 362, 408);
 
-        // Audio Button
-        JButton audioButton = new JButton("Audio: " + (isOn ? "On" : "Off"));
-        audioButton.setBounds(76, 260, 219, 56);
-        audioButton.addActionListener(e -> {
-            isOn = !isOn; // Toggle audio
-            audioButton.setText("Audio: " + (isOn ? "On" : "Off"));
-        });
+        home = new JButton();
+        home.setBounds(76, 256, 219, 56);
+        home.setVisible(true);
+        home.setOpaque(false);
+        home.setContentAreaFilled(false);
+        home.setBorderPainted(false);
+        home.addActionListener(this);
 
-        // Exit Button
-        JButton exitButton = new JButton("Exit");
-        exitButton.setBounds(76, 340, 219, 56);
-        exitButton.addActionListener(e -> {
-            System.exit(0); // Exit the application
-        });
+        gameOverP.add(home);
 
-        // Add buttons to the pause panel
-        nextP.add(resumeButton);
-        nextP.add(restartButton);
-        nextP.add(audioButton);
-        nextP.add(exitButton);
+        //gameOverP.add(tryAgain);
 
-        // Add the pause panel to the layered pane
-        layeredPane.add(nextP, JLayeredPane.MODAL_LAYER);
+        // Add overlay to the layeredPane at a higher layer
+        layeredPane.add(gameOverP, JLayeredPane.MODAL_LAYER);
         layeredPane.repaint();
         layeredPane.revalidate();
-    }
-
-
-    public void gameOver(){
-
-    }
-
-
-    private void overlayPanel() {
-        JPanel overlay = new JPanel(null);
-        overlay.setBackground(Color.decode("#d9f1e1"));
-        overlay.setBounds(0, 0, 1000, 800);
-
-        JLabel overlayLabel = new JLabel("Overlay Panel");
-        overlayLabel.setBounds(400, 300, 200, 50);
-        overlay.add(overlayLabel);
-
-        JButton backButton = new JButton("Back");
-        backButton.setBounds(400, 400, 200, 50);
-        backButton.addActionListener(e -> {
-            if (!panelStack.isEmpty()) {
-                JPanel previousPanel = panelStack.pop();
-                switchPanel(previousPanel);
-            }
-        });
-
-        overlay.add(backButton);
-
-        // Push current panel to the stack before switching to overlay
-        panelStack.push((JPanel) mainPanel.getComponent(0));
-        switchPanel(overlay);
     }
 
     //flashscreen
@@ -325,7 +284,7 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         quit.setBounds(718,618,186,86);
 
         hs = new JButton(); //highscore
-        hs.setBounds(609,10,271,71);
+        hs.setBounds(328,618,271,86);
         hs.setVisible(true);
         hs.setOpaque(false);
         hs.setContentAreaFilled(false);
@@ -428,63 +387,60 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
     public void highscorePg(){
         p5 = new JPanel(null);
-        p5.setBounds(150,100,500,700);
+        p5.setBounds(350,100,300,500);
         p5.setBackground(Color.GREEN);
         highscore = new JLabel();
+
+        String filePath = "highscore.txt";
+        StringBuilder highscoreText = new StringBuilder("<html><h1>High Scores</h1><ul>");
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                highscoreText.append("<li>").append(line).append("</li>");
+            }
+        } catch (IOException e) {
+            highscoreText.append("<li>Error reading scores</li>");
+            System.out.println("Error reading high scores: " + e.getMessage());
+        }
+
+        highscoreText.append("</ul></html>");
+
+        // Create a JLabel with the high scores
+        highscore = new JLabel(highscoreText.toString());
+        highscore.setHorizontalAlignment(SwingConstants.CENTER);
+        highscore.setVerticalAlignment(SwingConstants.TOP);
+        p5.setLayout(new BorderLayout());
+        p5.add(highscore, BorderLayout.CENTER);
 
         switchPanel(p5);
     }
 
-    public void catching(){
+    public void catching() {
         gameStage = 1;
         p.resetLives();
 
-        //screen background
-        miniGameBGUrl = Game.class.getResource("images/miniGamebackground.png");
-        BgIcon = new ImageIcon(miniGameBGUrl);
-        Image bgv2 = BgIcon.getImage().getScaledInstance(1000,800, Image.SCALE_SMOOTH);
-//        BgIcon = new ImageIcon(bgv2);
-//        bg2 = new JLabel(BgIcon);
-//        bg2.setBounds(0,0,1000,800);
-
-//        p7 = new JPanel(null) {
-//            @Override
-//            protected void paintComponent(Graphics g) {
-//                super.paintComponent(g);
-//                // Draw the image
-//                g.drawImage(bgv2, 0, 0, 1000, 800, this);
-//            }
-//        };
         p7 = new JPanel(null);
         p7.setBackground(Color.decode("#789adb"));
         p7.setBounds(0, 0, 1000, 800);
 
-        // Initialize message
-        setMsg(0,p7);
-        msgLabels[0].setLocation(0,50);
-
-        // Initialize basket
-        pikminUrl = Game.class.getResource("images/pikminFront.png"); // dimensions: 35x55
+        pikminUrl = Game.class.getResource("images/pikminFront.png");
         pikminIcon = new ImageIcon(pikminUrl);
         Image pikminFrontV2 = pikminIcon.getImage().getScaledInstance(175, 276, Image.SCALE_SMOOTH);
         pikminIcon = new ImageIcon(pikminFrontV2);
 
         basket = new JLabel(pikminIcon);
-        basket.setSize(175,276);
+        basket.setSize(175, 276);
         basket.setLocation(p.getpX(), p.getpY());
-
 
         fog = new FallingObjectsGame(p7, basket, p, mainPanel, this);
 
-//        if(p.getHighscore() >=100) {
-//            System.out.println("You win!");
-//            next();
-//        }
+        setMsg(0, p7); // Show tutorial message and wait for 'Q'
 
-        // Add components to the panel
         p7.add(basket);
         layeredPane.add(p7, JLayeredPane.DEFAULT_LAYER);
         switchPanel(p7);
+
     }
 
     public void mix(){
@@ -492,41 +448,52 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         p.resetLives();
 
         mainPanel.removeAll();
+
         mixGame = new Mix(mainPanel, p, this);
         r1Steps.add(mixGame);
+
+        setMsg(1, mainPanel);
+
         mainPanel.revalidate();
         mainPanel.repaint();
-        mainPanel.addKeyListener(this);
         mainPanel.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works
     }
 
-    public void bake(){
+    public void bake() {
         gameStage = 3;
         p.resetLives();
 
         mainPanel.removeAll();
-        bakeGame = new Bake(mainPanel, p);
+
+        bakeGame = new Bake(mainPanel, p, fileIO);
+
+        setMsg(2, mainPanel); // Show tutorial message and wait for 'Q'
+
         mainPanel.revalidate();
         mainPanel.repaint();
-        mainPanel.addKeyListener(this);
-        mainPanel.requestFocusInWindow(); // Re-assert focus to ensure KeyListener works
+        mainPanel.requestFocusInWindow();
     }
 
     @Override
     public void onGameWin() {
-        // Handle the game win event
-        System.out.println("You win! Transitioning to the next stage...");
         next();
     }
 
     @Override
+    public void onGameLose(){
+        gameOver();
+    }
+
+    @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == start) {
-            recipeList();
+        if (e.getSource() == home) {
+            titlescreen();
+            layeredPane.remove(gameOverP);// Remove overlay
+            layeredPane.repaint();
         }
 
-        if (e.getSource() == pause) {
-            System.out.println("On pause panel");
+        if (e.getSource() == start) {
+            recipe1();
         }
 
         if (e.getSource() == quit) {
@@ -538,10 +505,6 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
         if (e.getSource() == hs){
             highscorePg();
-        }
-
-        if(e.getSource() == recipe1){
-            recipe1();
         }
 
         if(e.getSource() == audio){
@@ -575,17 +538,39 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
             mix(); // Call mix() method
             layeredPane.remove(nextP);// Remove overlay
             layeredPane.repaint();
-            System.out.println("Next clicked for mix");
         }
         else if("NEXT_STAGE_2".equals(command)){
+            bake();
             layeredPane.remove(nextP);// Remove overlay
             layeredPane.repaint();
-            System.out.println("Going to gamestage 3");
+        }
+
+
+        if ("RETRY_STAGE_1".equals(command)) {
+            // Restart the catching game
+            catching();
+            layeredPane.remove(nextP);
+            layeredPane.repaint();
+        } else if ("RETRY_STAGE_2".equals(command)) {
+            // Restart the mix game
+            mix();
+            layeredPane.remove(nextP);
+            layeredPane.repaint();
+        } else if ("RETRY_STAGE_3".equals(command)) {
+            // Restart the bake game
+            bake();
+            layeredPane.remove(nextP);
+            layeredPane.repaint();
         }
     }
 
     public void keyPressed(KeyEvent e){
-System.out.println(gameStage);
+            if (e.getKeyCode() == KeyEvent.VK_Q) {
+                layeredPane.removeKeyListener(this);
+                tutorialMsg.setVisible(false); // Hide the message
+                startCurrentGame(gameStage-1); // Start the game
+            }
+
         switch(gameStage) {
             case 1:
                 if (e.getKeyCode() == KeyEvent.VK_LEFT) {
@@ -593,9 +578,6 @@ System.out.println(gameStage);
                         basket.setIcon(pikminIcon);
                         p.moveL();
                         basket.setLocation(p.getpX(), p.getpY());
-                        if(msgLabels[0]!=null){
-                            msgLabels[0].setVisible(false);
-                        }
 
                 }
                 if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
@@ -603,36 +585,24 @@ System.out.println(gameStage);
                         basket.setIcon(pikminIcon);
                         p.moveR();
                         basket.setLocation(p.getpX(), p.getpY());
-                        if(msgLabels[0]!=null){
-                            msgLabels[0].setVisible(false);
-                        }
                 }
 
-                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    System.out.println("ESC pressed");
-                    if (fog != null) {
-                        fog = null;
-                        System.gc();
-                    }
-                    titlescreen();
-                }
-                break;
             case 2:
                 if (e.getKeyCode() == KeyEvent.VK_A) {
-                    mixGame.handleKeyPress('a');
                     System.out.println("a pressed");
+                    mixGame.handleKeyPress('a');
                 }
-                else if (e.getKeyCode() == KeyEvent.VK_W) {
-                    mixGame.handleKeyPress('w');
+                if (e.getKeyCode() == KeyEvent.VK_W) {
                     System.out.println("w pressed");
+                    mixGame.handleKeyPress('w');
                 }
-                else if (e.getKeyCode() == KeyEvent.VK_S) {
-                    mixGame.handleKeyPress('s');
+                if (e.getKeyCode() == KeyEvent.VK_S) {
                     System.out.println("s pressed");
+                    mixGame.handleKeyPress('s');
                 }
-                else if (e.getKeyCode() == KeyEvent.VK_D) {
-                    mixGame.handleKeyPress('d');
+                if (e.getKeyCode() == KeyEvent.VK_D) {
                     System.out.println("d pressed");
+                    mixGame.handleKeyPress('d');
                 }
             case 3:
                 if(e.getKeyCode() == KeyEvent.VK_SPACE){

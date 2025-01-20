@@ -28,7 +28,7 @@ public class FallingObjectsGame {
         //goToNext = n; //the panel that will be displayed once this minigame is complete, returning back to the Game class
         basket_ = b;
         escPressed = false;
-        person = new Player();
+        p_ = person;
         imgPath = "images/milk.png"; //default
 
         imagePaths = new String[]{"images/egg.png", "images/flour.png", "images/sugar.png", "images/milk.png"};
@@ -46,8 +46,6 @@ public class FallingObjectsGame {
         p_ = person;
         fallingObjects = Collections.synchronizedList(new ArrayList<>());
 
-        System.out.println(imgPath);
-
         FallingObject obj = new FallingObject(panel, imgPath); //default, first object
         fallingObjects.add(obj);
         panel.setFocusable(true);
@@ -61,7 +59,7 @@ public class FallingObjectsGame {
                 updateObjects();
             }
         });
-        timer.start();
+//        timer.start();
 
         spawningTimer = new Timer(1000, new ActionListener(){
 
@@ -70,7 +68,7 @@ public class FallingObjectsGame {
                 spawnFallingObject();
             }
         });
-        spawningTimer.start();
+//        spawningTimer.start();
 
     }
 
@@ -86,12 +84,9 @@ public class FallingObjectsGame {
 
         int rng = (int)(Math.random() * imagePaths.length); // Randomize the image
         imgPath = imagePaths[rng]; //set the image to display the one randomly chosen
-        System.out.println("Numer" + rng);
-        System.out.println(imagePaths.length);
 
         FallingObject obj = new FallingObject(panel, imgPath);
         fallingObjects.add(obj);
-        //System.out.println("Amount of objects: " + fallingObjects.size());
 
         // Revalidate and repaint the panel
         panel.revalidate();
@@ -99,10 +94,20 @@ public class FallingObjectsGame {
     }
 
     private void updateObjects() {
-        if (p_.getHighscore() < 0) {
-            p_.setHighscore(0);
-            System.out.println("You lose! Try again");
-            return; // Exit the method if the highscore is invalid
+        if (p_.getScore() < 0) {
+            p_.setScore(0);
+            if(p_.getLives() < 1){
+                timer.stop();
+                spawningTimer.stop();
+                if (listener != null) {
+                    listener.onGameLose(); // Notify the game to show the gameover panel
+                }
+                return;
+            }
+            else{
+                p_.decreaseLives();
+            }
+            return; // Exit the method if the Score is invalid
         }
 
         for (int i = 0; i < fallingObjects.size(); i++) {
@@ -114,7 +119,7 @@ public class FallingObjectsGame {
                 panel.remove(obj.imgLabel);
                 fallingObjects.remove(i);
                 i--; // Adjust index after removal
-                p_.decreaseHighscore();
+                p_.decreaseScore();
                 continue;
             }
 
@@ -125,12 +130,11 @@ public class FallingObjectsGame {
                 i--; // Adjust index after removal
 
                 // Update the score
-                p_.incHighscore();
-                pb.setValue(p_.getHighscore());
+                p_.incScore();
+                pb.setValue(p_.getScore());
 
                 // End game if score reaches 100
-                if (p_.getHighscore() >= 100) {
-                    System.out.println("You win yay " + p_.getHighscore());
+                if (p_.getScore() >= 100) {
                     timer.stop();
                     spawningTimer.stop();
 
@@ -147,17 +151,8 @@ public class FallingObjectsGame {
         panel.repaint();
     }
 
-
-    public void pause() {
-        timer.stop();
-        spawningTimer.stop();
-        System.out.println("Game paused.");
-    }
-
-    public void resume() {
+    public void start() {
         timer.start();
         spawningTimer.start();
-        System.out.println("Game resumed.");
     }
-
 }

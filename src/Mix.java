@@ -93,7 +93,16 @@ public class Mix extends Step {
                 // Wrong key pressed, reset position and show an error image (e.g., index 4)
                 pos = -1;
                 displayImage(4); // display the messed up image
-                System.out.println("Wrong sequence, try again");
+                p_.decreaseLives();
+//                if(p_.getLives()<1){
+//                    if (listener != null) {
+//                        listener.onGameLose(); // Notify the game to show the gameover panel
+//                    }
+//                    return;
+//                }
+//                else{
+//                    p_.decreaseLives();
+//                }
             } else {
                 // Correct key pressed, show the corresponding image
                 displayImage(pos); // Show image for the current position
@@ -101,10 +110,10 @@ public class Mix extends Step {
             }
             if (pos == 3) {
                 // Sequence completed successfully
-                System.out.println("Win! Current high score: " + p_.getHighscore());
+                System.out.println("Win! Current score: " + p_.getScore());
                 pos = -2; // Reset to a state where sequence won't continue
 
-                p_.incHighscoreDouble();
+                p_.incScoreDouble();
 
                 if (listener != null) {
                     listener.onGameWin(); // Notify the game to show the next panel

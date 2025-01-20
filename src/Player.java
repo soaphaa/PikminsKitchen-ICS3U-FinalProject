@@ -1,15 +1,19 @@
 public class Player {
     private int highscore;
+    private int score; //temporary score
     private int pY;
     private int pX;
     private int lives;
+    private GameEventListener l;
 
-    public Player(){
-        this(500);
+    public Player(GameEventListener listener){
+        this(500, listener);
     }
 
-    public Player(int x_){
+    public Player(int x_, GameEventListener listener){
+        l = listener;
         highscore = 0;
+        score = 99;
         pX = x_;
         pY = 500;
         lives = 3;
@@ -23,24 +27,35 @@ public class Player {
         highscore = hs;
     }
 
-    public void incHighscore(){
-        highscore+=10;
+    public void setScore(int s){
+        score = s;
     }
 
-    public void incHighscoreDouble(){
-        highscore+=20;
+    public int getScore(){
+        return score;
     }
 
-    public void decreaseHighscore(){
-        highscore-=10;
+    public void incScore(){
+        score+=10;
+    }
+
+    public void incScoreDouble(){
+        score+=20;
+    }
+
+    public void decreaseScore(){
+        score-=10;
     }
 
     public void decreaseLives(){
-        if(lives >0){
-            System.out.println("GAME OVER!");
-            //use GAME OVER panel in GAME
+        if(lives < 1){
+            l.onGameLose();
         }
         lives--;
+    }
+
+    public int getLives(){
+        return lives;
     }
 
     public void resetLives(){
