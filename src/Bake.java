@@ -21,6 +21,7 @@ public class Bake {
     public Bake(JPanel mainPanel, Player player, FileIO file) {
         this.mPanel = mainPanel;
         this.p_ = player;
+        this.f = file;
 
         // Paths to cookie state images
         imgPath = new String[]{

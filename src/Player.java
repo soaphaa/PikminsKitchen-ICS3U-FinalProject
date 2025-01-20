@@ -13,7 +13,7 @@ public class Player {
     public Player(int x_, GameEventListener listener){
         l = listener;
         highscore = 0;
-        score = 99;
+        score = 0;
         pX = x_;
         pY = 500;
         lives = 3;

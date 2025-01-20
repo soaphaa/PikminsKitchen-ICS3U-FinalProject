@@ -34,7 +34,7 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
     // GUI JFrame
     JPanel p1, p2, p3, p4, p5, p6, p7, nextP, pauseP, gameOverP;
     static JLabel title, aON, aOFF, bg1, bg2, basket, fallingObject, highscore, tutorialMsg;
-    JButton start, quit, hs, audio, back, home, recipe1, startRecipe, exitRecipe, next, tryAgain;
+    JButton start, quit, hs, audio, back, home, recipe1, startRecipe, exitRecipe, next, tryAgain, tryAgainOver;
     ImageIcon titleIcon, audioOn, audioOff, recipeBg, pikminIcon, ingredientIcon, BgIcon;
     static URL titleURL, audioUrl, audio2Url, bg1Url, pikminUrl, ingredientUrl, miniGameBGUrl;
     JProgressBar pb, pb2;
@@ -67,14 +67,13 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         // Initialize layered pane
         layeredPane = new JLayeredPane();
         layeredPane.setBounds(0, 0, 1000, 850);
-//        layeredPane.setFocusable(true); // Allow layeredPane to capture key events
-//        layeredPane.requestFocusInWindow(); // focus
         add(layeredPane);
 
         // Initialize mainPanel
         mainPanel = new JPanel(null);
         mainPanel.setBounds(0, 0, 1000, 800);
-        mainPanel.setBackground(Color.LIGHT_GRAY);
+        mainPanel.setBackground(Color.decode("#d9e1f1"));
+
         layeredPane.add(mainPanel, JLayeredPane.DEFAULT_LAYER);
 
         msgPaths = new String[]{"images/catchingMessage.png", "images/msgMix.png", "images/msgBake.png"};
@@ -95,11 +94,11 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
         panelStack = new Stack<>();
 
-        this.titlescreen();
+        this.titlescreen(); //start the game at the titlescreen flashscreen
 
         addKeyListener(this);  // Add key listener to the frame
 
-        fileIO = new FileIO("highscore.txt"); //new file IO class
+        fileIO = new FileIO("C:highscore.txt"); //new file IO class
 
         mainPanel.addKeyListener(this); //add key listener once
     }
@@ -249,6 +248,24 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
         gameOverP.add(home);
 
+        tryAgainOver = new JButton();
+        tryAgainOver.setBounds(76, 322, 219, 56);
+        tryAgainOver.setVisible(true);
+        tryAgainOver.setOpaque(false);
+        tryAgainOver.setContentAreaFilled(false);
+        tryAgainOver.setBorderPainted(false);
+        tryAgainOver.setActionCommand("RETRY_STAGE_" + gameStage);
+
+        tryAgainOver.addActionListener(e -> {
+            if (!panelStack.isEmpty()) {
+                JPanel previousPanel = panelStack.pop();
+                switchPanel(previousPanel);
+            }
+            // Remove overlay
+            layeredPane.remove(nextP);
+            layeredPane.repaint();
+        });
+
         //gameOverP.add(tryAgain);
 
         // Add overlay to the layeredPane at a higher layer
@@ -344,6 +361,8 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         switchPanel(p2);
     }
 
+
+    //recipe screen
     public void recipe1(){
 
         Border borderWhite = BorderFactory.createLineBorder(Color.WHITE, 15, true);
@@ -387,8 +406,8 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
     public void highscorePg(){
         p5 = new JPanel(null);
-        p5.setBounds(350,100,300,500);
-        p5.setBackground(Color.GREEN);
+        p5.setBounds(250,100,500,600);
+        p5.setBackground(Color.BLUE);
         highscore = new JLabel();
 
         String filePath = "highscore.txt";
@@ -410,9 +429,20 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         highscore = new JLabel(highscoreText.toString());
         highscore.setHorizontalAlignment(SwingConstants.CENTER);
         highscore.setVerticalAlignment(SwingConstants.TOP);
-        p5.setLayout(new BorderLayout());
-        p5.add(highscore, BorderLayout.CENTER);
+        p5.setLayout(null);
+        p5.add(highscore);
 
+        back = new JButton();
+        back.setSize(150,50);
+        back.setLocation(50,525);
+        back.setVisible(true);
+//        back.setOpaque(false);
+//        back.setContentAreaFilled(false);
+//        back.setBorderPainted(false);
+
+        back.addActionListener(this);
+
+        p5.add(back);
         switchPanel(p5);
     }
 
@@ -530,6 +560,13 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
             catching();
 
+        }
+        else if(e.getSource() == exitRecipe){
+            titlescreen();
+        }
+
+        if(e.getSource() == back){
+            titlescreen();
         }
 
         String command = e.getActionCommand();
