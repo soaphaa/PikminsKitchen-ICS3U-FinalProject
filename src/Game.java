@@ -153,18 +153,18 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         // Create the overlay panel
         URL nextUrl = Game.class.getResource("images/nextScreen.png");
         ImageIcon nextIcon = new ImageIcon(nextUrl);
-        Image resizedNextIcon = nextIcon.getImage().getScaledInstance(362, 408, Image.SCALE_SMOOTH);
+        Image resizedNextIcon = nextIcon.getImage().getScaledInstance(362, 241, Image.SCALE_SMOOTH);
 
         nextP = new JPanel(null) {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 // Draw the background image
-                g.drawImage(resizedNextIcon, 0, 0, 362, 408, this);
+                g.drawImage(resizedNextIcon, 0, 0, 362, 241, this);
             }
         };
 
-        nextP.setBounds(319, 196, 362, 408);
+        nextP.setBounds(600, 196, 362, 241);
 
         // Add the "Next" button
         next = new JButton();
@@ -230,18 +230,18 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
         URL overURL = Game.class.getResource("images/GameOver.png");
         ImageIcon overIcon = new ImageIcon(overURL);
-        Image resizedGameOverIcon = overIcon.getImage().getScaledInstance(362, 408, Image.SCALE_SMOOTH);
+        Image resizedGameOverIcon = overIcon.getImage().getScaledInstance(362, 241, Image.SCALE_SMOOTH);
 
         gameOverP = new JPanel(null) {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 // Draw the background image
-                g.drawImage(resizedGameOverIcon, 0, 0, 362, 408, this);
+                g.drawImage(resizedGameOverIcon, 0, 0, 357, 241, this);
             }
         };
 
-        gameOverP.setBounds(319, 196, 362, 408);
+        gameOverP.setBounds(319, 196, 357, 241);
 
         home = new JButton();
         home.setBounds(71, 149, 219, 60);

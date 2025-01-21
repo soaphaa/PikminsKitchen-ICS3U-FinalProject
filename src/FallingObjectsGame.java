@@ -31,7 +31,7 @@ public class FallingObjectsGame {
         p_ = person;
         imgPath = "images/milk.png"; //default
 
-        imagePaths = new String[]{"images/egg.png", "images/flour.png", "images/sugar.png", "images/milk.png"};
+        imagePaths = new String[]{"images/egg.png", "images/flour.png", "images/sugar.png", "images/butter.png"};
 
         pb = new JProgressBar(0, 100); //score progress bar
 

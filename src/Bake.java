@@ -41,7 +41,7 @@ public class Bake {
             image = new ImageIcon(scaledImage);
             imgLabel[i] = new JLabel(image);
             imgLabel[i].setSize(500, 500);
-            imgLabel[i].setLocation(250, 150);
+            imgLabel[i].setLocation(75, 150);
         }
 
         // Load progress bar background image
