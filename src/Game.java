@@ -94,7 +94,7 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         //player
         p = new Player(this, 3, mainPanel);
 
-        this.catching(); //start the game at the titlescreen flashscreen
+        this.titlescreen(); //start the game at the titlescreen flashscreen
 
         addKeyListener(this);  // Add key listener to the frame
 
