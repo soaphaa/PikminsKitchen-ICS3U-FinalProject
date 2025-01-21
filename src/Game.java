@@ -94,7 +94,7 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         //player
         p = new Player(this, 3, mainPanel);
 
-        this.titlescreen(); //start the game at the titlescreen flashscreen
+        this.catching(); //start the game at the titlescreen flashscreen
 
         addKeyListener(this);  // Add key listener to the frame
 
@@ -160,11 +160,11 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 // Draw the background image
-                g.drawImage(resizedNextIcon, 0, 0, 362, 241, this);
+                g.drawImage(resizedNextIcon, 0, 0, 362, 408, this);
             }
         };
 
-        nextP.setBounds(600, 196, 362, 241);
+        nextP.setBounds(600, 196, 362, 408);
 
         // Add the "Next" button
         next = new JButton();
@@ -241,7 +241,7 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
             }
         };
 
-        gameOverP.setBounds(319, 196, 357, 241);
+        gameOverP.setBounds(550, 196, 357, 241);
 
         home = new JButton();
         home.setBounds(71, 149, 219, 60);

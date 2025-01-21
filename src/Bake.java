@@ -111,13 +111,9 @@ public class Bake {
             } else {
                 ((Timer) e.getSource()).stop(); // Stop when progress bar is full
                 displayImage(4); // Show "fire" image (baking failed)
-                p_.decreaseLives(); // Decrease a life
-                if (p_.getLives() == 0) {
-                    listener.onGameLose();
-                }
+                listener.onGameLose();
             }
         });
-        timer.start();
     }
 
     public void stopTimer() {

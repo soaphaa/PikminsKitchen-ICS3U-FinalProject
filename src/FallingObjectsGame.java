@@ -24,6 +24,7 @@ public class FallingObjectsGame {
 
     public FallingObjectsGame(JPanel p, JLabel b, Player person, JPanel mainPanel, GameEventListener listener){
         panel = p;
+        mPanel = mainPanel;
         this.listener  = listener;
         //goToNext = n; //the panel that will be displayed once this minigame is complete, returning back to the Game class
         basket_ = b;
@@ -96,12 +97,14 @@ public class FallingObjectsGame {
     private void updateObjects() {
         for (int i = 0; i < fallingObjects.size(); i++) {
             FallingObject obj = fallingObjects.get(i);
+            fallingObjects.get(i).setVisible(true);
             obj.update();
 
             // Remove object if it goes off the screen
-            if (obj.isOutOfBounds(panel)) {
-                panel.remove(obj.imgLabel);
+            if (obj.isOutOfBounds(mPanel)) {
+                mPanel.remove(obj.imgLabel);
                 fallingObjects.remove(i);
+                fallingObjects.get(i).setVisible(false);
                 i--;
 
                 p_.decreaseLives(); // Decrease a life
