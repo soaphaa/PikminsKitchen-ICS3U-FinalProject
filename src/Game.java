@@ -18,10 +18,7 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
     boolean isOn = true;
     private Stack<JPanel> panelStack; // Stack to track navigation history with settings method
     JPanel mainPanel;
-
-    //player
-    Player p;
-    FileIO fileIO;
+    Image scaledTitle;
 
     // Message displayed
     public static JLabel message;
@@ -33,12 +30,14 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
     // GUI JFrame
     JPanel p1, p2, p3, p4, p5, p6, p7, nextP, pauseP, gameOverP;
-    static JLabel title, aON, aOFF, bg1, bg2, basket, fallingObject, highscore, tutorialMsg;
-    JButton start, quit, hs, audio, back, home, recipe1, startRecipe, exitRecipe, next, tryAgain, tryAgainOver;
+    static JLabel title, aON, aOFF, bg1, bg2, basket, fallingObject, hs, tutorialMsg;
+    JButton start, quit, audio, back, home, recipe1, startRecipe, exitRecipe, next, tryAgain;
     ImageIcon titleIcon, audioOn, audioOff, recipeBg, pikminIcon, ingredientIcon, BgIcon;
     static URL titleURL, audioUrl, audio2Url, bg1Url, pikminUrl, ingredientUrl, miniGameBGUrl;
     JProgressBar pb, pb2;
     private JLayeredPane layeredPane; // Layered pane to manage overlays
+
+    Player p;
 
     //child class objects
     ArrayList<Step> r1Steps = new ArrayList<>();
@@ -61,8 +60,6 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
-
-        p = new Player(500, this);
 
         // Initialize layered pane
         layeredPane = new JLayeredPane();
@@ -94,11 +91,12 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
         panelStack = new Stack<>();
 
+        //player
+        p = new Player(this, 3, mainPanel);
+
         this.titlescreen(); //start the game at the titlescreen flashscreen
 
         addKeyListener(this);  // Add key listener to the frame
-
-        fileIO = new FileIO("C:highscore.txt"); //new file IO class
 
         mainPanel.addKeyListener(this); //add key listener once
     }
@@ -176,11 +174,10 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         next.setContentAreaFilled(false);
         next.setBorderPainted(false);
         // Set the action command corresponding to the gameStage
-        switch(gameStage){
+        switch (gameStage) {
             case 1 -> next.setActionCommand("NEXT_STAGE_1");
             case 2 -> next.setActionCommand("NEXT_STAGE_2");
             case 3 -> next.setActionCommand("NEXT_STAGE_3");
-
         }
         next.addActionListener(this); // Add action listener to this button
 
@@ -203,7 +200,14 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
             layeredPane.repaint();
         });
 
-        // Add buttons to the panel
+        // Display the current score
+        JLabel scoreLabel = new JLabel("Score: " + p.getScore());
+        scoreLabel.setFont(new Font("Arial", Font.BOLD, 25));
+        scoreLabel.setForeground(Color.decode("#224b9d"));
+        scoreLabel.setBounds(100, 140, 200, 50); // Adjust size and position as needed
+        nextP.add(scoreLabel);
+
+        // Add buttons and score label to the panel
         nextP.add(next);
         nextP.add(tryAgain);
 
@@ -212,6 +216,7 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         layeredPane.repaint();
         layeredPane.revalidate();
     }
+
 
     public void gameOver(){
         if (gameOverP != null) {
@@ -239,7 +244,7 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         gameOverP.setBounds(319, 196, 362, 408);
 
         home = new JButton();
-        home.setBounds(76, 256, 219, 56);
+        home.setBounds(71, 149, 219, 60);
         home.setVisible(true);
         home.setOpaque(false);
         home.setContentAreaFilled(false);
@@ -247,24 +252,6 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         home.addActionListener(this);
 
         gameOverP.add(home);
-
-        tryAgainOver = new JButton();
-        tryAgainOver.setBounds(76, 322, 219, 56);
-        tryAgainOver.setVisible(true);
-        tryAgainOver.setOpaque(false);
-        tryAgainOver.setContentAreaFilled(false);
-        tryAgainOver.setBorderPainted(false);
-        tryAgainOver.setActionCommand("RETRY_STAGE_" + gameStage);
-
-        tryAgainOver.addActionListener(e -> {
-            if (!panelStack.isEmpty()) {
-                JPanel previousPanel = panelStack.pop();
-                switchPanel(previousPanel);
-            }
-            // Remove overlay
-            layeredPane.remove(nextP);
-            layeredPane.repaint();
-        });
 
         //gameOverP.add(tryAgain);
 
@@ -276,19 +263,25 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
     //flashscreen
     public void titlescreen(){
-        p1 = new JPanel();
-        p1.setLayout(null);
-        p1.setSize(mPanelWidth,mPanelHeight);
-        p1.setBackground(Color.decode("#d9e1f1"));
+
         titleURL = Game.class.getResource("images/pikminsTitlescreen.png");
         if (titleURL != null) {
             titleIcon = new ImageIcon(titleURL);
-            Image titlev2 = titleIcon.getImage().getScaledInstance(1000,800, Image.SCALE_SMOOTH);
-            titleIcon = new ImageIcon(titlev2);
+            scaledTitle = titleIcon.getImage().getScaledInstance(1000,800, Image.SCALE_SMOOTH);
         }
-        title = new JLabel(titleIcon);
-        title.setBounds(0,0,mPanelWidth,mPanelHeight);
-        p1.add(title);
+
+        p1 = new JPanel(null)
+        {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                // Draw the image
+                g.drawImage(scaledTitle, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        p1.setLayout(null);
+        p.setLivesVisible(false); // Hide lives display
+        p1.setSize(mPanelWidth,mPanelHeight);
 
         start = new JButton();
         start.setBounds(86,618,232,86);
@@ -299,13 +292,14 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
         quit = new JButton();
         quit.setBounds(718,618,186,86);
-
-        hs = new JButton(); //highscore
-        hs.setBounds(328,618,271,86);
+        
+        // Add high score label
+        hs = new JLabel("High Score: " + p.getHighscore());
+        System.out.println(p.getHighscore());
+        hs.setFont(new Font("Arial", Font.BOLD, 35));
+        hs.setForeground(Color.decode("#224b9d"));
+        hs.setBounds(375,615,300,100);
         hs.setVisible(true);
-        hs.setOpaque(false);
-        hs.setContentAreaFilled(false);
-        hs.setBorderPainted(false);
 
         audio = new JButton();
 
@@ -335,8 +329,8 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
         start.addActionListener(this);
         quit.addActionListener(this);
-        hs.addActionListener(this);
         audio.addActionListener(this);
+
 
         p1.add(start);
         p1.add(quit);
@@ -404,56 +398,16 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         switchPanel(p3);
     }
 
-    public void highscorePg(){
-        p5 = new JPanel(null);
-        p5.setBounds(250,100,500,600);
-        p5.setBackground(Color.BLUE);
-        highscore = new JLabel();
-
-        String filePath = "highscore.txt";
-        StringBuilder highscoreText = new StringBuilder("<html><h1>High Scores</h1><ul>");
-
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                highscoreText.append("<li>").append(line).append("</li>");
-            }
-        } catch (IOException e) {
-            highscoreText.append("<li>Error reading scores</li>");
-            System.out.println("Error reading high scores: " + e.getMessage());
-        }
-
-        highscoreText.append("</ul></html>");
-
-        // Create a JLabel with the high scores
-        highscore = new JLabel(highscoreText.toString());
-        highscore.setHorizontalAlignment(SwingConstants.CENTER);
-        highscore.setVerticalAlignment(SwingConstants.TOP);
-        p5.setLayout(null);
-        p5.add(highscore);
-
-        back = new JButton();
-        back.setSize(150,50);
-        back.setLocation(50,525);
-        back.setVisible(true);
-//        back.setOpaque(false);
-//        back.setContentAreaFilled(false);
-//        back.setBorderPainted(false);
-
-        back.addActionListener(this);
-
-        p5.add(back);
-        switchPanel(p5);
-    }
-
     public void catching() {
         gameStage = 1;
-        p.resetLives();
+        p.resetLives(); // Reset lives for the minigame
+        p.setLivesVisible(true); // Make lives visible
 
         p7 = new JPanel(null);
         p7.setBackground(Color.decode("#789adb"));
         p7.setBounds(0, 0, 1000, 800);
 
+        // Set up the basket
         pikminUrl = Game.class.getResource("images/pikminFront.png");
         pikminIcon = new ImageIcon(pikminUrl);
         Image pikminFrontV2 = pikminIcon.getImage().getScaledInstance(175, 276, Image.SCALE_SMOOTH);
@@ -463,15 +417,16 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
         basket.setSize(175, 276);
         basket.setLocation(p.getpX(), p.getpY());
 
+        // Initialize FallingObjectsGame
         fog = new FallingObjectsGame(p7, basket, p, mainPanel, this);
 
-        setMsg(0, p7); // Show tutorial message and wait for 'Q'
+        setMsg(0, p7); // Show tutorial message
 
         p7.add(basket);
         layeredPane.add(p7, JLayeredPane.DEFAULT_LAYER);
         switchPanel(p7);
-
     }
+
 
     public void mix(){
         gameStage = 2;
@@ -495,7 +450,7 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
         mainPanel.removeAll();
 
-        bakeGame = new Bake(mainPanel, p, fileIO);
+        bakeGame = new Bake(mainPanel, p, this);
 
         setMsg(2, mainPanel); // Show tutorial message and wait for 'Q'
 
@@ -506,12 +461,15 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
     @Override
     public void onGameWin() {
+        p.updateHighScore(); // Save the high score
         next();
     }
 
     @Override
-    public void onGameLose(){
-        gameOver();
+    public void onGameLose() {
+        System.out.println("Game lost. Showing Game Over screen...");
+        p.setLivesVisible(false); // Hide lives display
+        gameOver(); // Show the Game Over screen
     }
 
     @Override
@@ -528,13 +486,8 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
 
         if (e.getSource() == quit) {
             if (JOptionPane.showConfirmDialog(null, "Are you sure you want to quit?", "Pikmin", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                JOptionPane.showMessageDialog(null, "Closing game..");
                 System.exit(0);
             }
-        }
-
-        if (e.getSource() == hs){
-            highscorePg();
         }
 
         if(e.getSource() == audio){
@@ -581,7 +534,11 @@ public class Game extends JFrame implements ActionListener,KeyListener, GameEven
             layeredPane.remove(nextP);// Remove overlay
             layeredPane.repaint();
         }
-
+        else if("NEXT_STAGE_3".equals(command)){
+            titlescreen();
+            layeredPane.remove(nextP);// Remove overlay
+            layeredPane.repaint();
+        }
 
         if ("RETRY_STAGE_1".equals(command)) {
             // Restart the catching game

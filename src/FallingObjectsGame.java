@@ -52,7 +52,7 @@ public class FallingObjectsGame {
 
 
 
-        timer = new Timer(35, new ActionListener(){
+        timer = new Timer(75, new ActionListener(){
 
             @Override
             public void actionPerformed(ActionEvent e){
@@ -94,22 +94,6 @@ public class FallingObjectsGame {
     }
 
     private void updateObjects() {
-        if (p_.getScore() < 0) {
-            p_.setScore(0);
-            if(p_.getLives() < 1){
-                timer.stop();
-                spawningTimer.stop();
-                if (listener != null) {
-                    listener.onGameLose(); // Notify the game to show the gameover panel
-                }
-                return;
-            }
-            else{
-                p_.decreaseLives();
-            }
-            return; // Exit the method if the Score is invalid
-        }
-
         for (int i = 0; i < fallingObjects.size(); i++) {
             FallingObject obj = fallingObjects.get(i);
             obj.update();
@@ -118,8 +102,18 @@ public class FallingObjectsGame {
             if (obj.isOutOfBounds(panel)) {
                 panel.remove(obj.imgLabel);
                 fallingObjects.remove(i);
-                i--; // Adjust index after removal
-                p_.decreaseScore();
+                i--;
+
+                p_.decreaseLives(); // Decrease a life
+                if (p_.getLives() == 0) {
+                    System.out.println("Lives exhausted. Triggering game over...");
+                    timer.stop();
+                    spawningTimer.stop();
+                    if (listener != null) {
+                        listener.onGameLose(); // Notify the Game class
+                    }
+                    return;
+                }
                 continue;
             }
 
@@ -127,29 +121,29 @@ public class FallingObjectsGame {
             if (obj.imgLabel.getBounds().intersects(basket_.getBounds())) {
                 panel.remove(obj.imgLabel);
                 fallingObjects.remove(i);
-                i--; // Adjust index after removal
-
-                // Update the score
+                i--;
                 p_.incScore();
                 pb.setValue(p_.getScore());
 
                 // End game if score reaches 100
                 if (p_.getScore() >= 100) {
+                    System.out.println("Player wins");
                     timer.stop();
                     spawningTimer.stop();
-
                     if (listener != null) {
-                        listener.onGameWin(); // Notify the game to show the next panel
+                        listener.onGameWin();
                     }
                     return;
                 }
             }
         }
 
-        // Revalidate and repaint the panel
         panel.revalidate();
         panel.repaint();
     }
+
+
+
 
     public void start() {
         timer.start();

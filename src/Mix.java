@@ -5,22 +5,17 @@ import java.net.*;
 public class Mix extends Step {
 
     int pos; // KeyPressed determines the position
-    char order[];
+    char[] order;
 
     private String[] imagePaths; // To store the different image paths
-    private String imgPath; // Stores the chosen img
-    private String[] isPressedPaths;
-    private String[] notPressedPaths;
-    JLabel[] isPressed;
-    JLabel[] notPressed;
+    private String[] sequencePaths; // Stores the different img paths of the sequence
 
     // GUI
     private GameEventListener listener;
     JPanel mPanel, panel;
     URL imgUrl, bgUrl;
     ImageIcon image, bg, seq;
-    JLabel sequenceDisplay;
-    JLabel[] imgLabel;
+    JLabel[] imgLabel, sequenceLabel;
     Player p_;
 
     public Mix(JPanel mainPanel, Player player, GameEventListener listener) {
@@ -30,9 +25,10 @@ public class Mix extends Step {
         p_ = player;
         bgUrl = Mix.class.getResource("images/miniGameBackground.png");
         bg = new ImageIcon(bgUrl);
-        Image scaledimg = bg.getImage().getScaledInstance(700, 700, Image.SCALE_SMOOTH);
+        Image scaledimg = bg.getImage().getScaledInstance(1000, 800, Image.SCALE_SMOOTH);
 
-        panel = new JPanel(null) {
+        panel = new JPanel(null)
+        {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -41,18 +37,24 @@ public class Mix extends Step {
             }
         };
 
-        panel.setSize(1000, 700);
-        panel.setLocation(0, 50);
+        panel.setSize(1000, 800);
+        panel.setLocation(0, 0);
+        panel.setBackground(Color.decode("#feece0"));
         panel.setFocusable(true);
         panel.setVisible(true);
 
-        URL sequenceUrl = Mix.class.getResource("images/awdsPlain.png");
-        seq = new ImageIcon(sequenceUrl);
-        Image scaledseq = seq.getImage().getScaledInstance(96, 18, Image.SCALE_SMOOTH);
-        seq = new ImageIcon(scaledseq);
-        sequenceDisplay = new JLabel(seq);
-        sequenceDisplay.setBounds(100,50,96,18);
-        panel.add(sequenceDisplay);
+        sequencePaths = new String[]{"images/aPressed.png", "images/wPressed.png", "images/dPressed.png", "images/sPressed.png" };
+        sequenceLabel = new JLabel[4];
+
+        for(int i = 0; i<4; i++) {
+            URL sequenceUrl = Mix.class.getResource(sequencePaths[i]);
+            seq = new ImageIcon(sequenceUrl);
+            Image scaledseq = seq.getImage().getScaledInstance(745, 160, Image.SCALE_SMOOTH);
+            seq = new ImageIcon(scaledseq);
+            sequenceLabel[i] = new JLabel(seq);
+            sequenceLabel[i].setBounds(120, 30, 750, 165);
+            sequenceLabel[i].setVisible(false);
+        }
 
         pos = -1;
         order = new char[]{'a', 'w', 'd', 's'};
@@ -67,10 +69,11 @@ public class Mix extends Step {
             image = new ImageIcon(scaledImage);
             imgLabel[i] = new JLabel(image);
             imgLabel[i].setSize(500, 500);
-            imgLabel[i].setLocation(250, 100);
+            imgLabel[i].setLocation(240, 200);
         }
 
         displayImage(5); // Display the default image at index 5
+        displaySequence(0); //Display default instruction (click a)
 
         mPanel.add(panel); // Add the panel to the main JFrame in the Game class
         mPanel.revalidate();
@@ -85,6 +88,20 @@ public class Mix extends Step {
         mPanel.repaint();
     }
 
+    public void displaySequence(int index){
+        if(sequenceLabel!=null){
+            if(index > 0) {
+                sequenceLabel[index - 1].setVisible(false);
+            }
+        }
+
+        assert sequenceLabel != null;
+        sequenceLabel[index].setVisible(true);
+        panel.add(sequenceLabel[index]);
+        mPanel.revalidate();
+        mPanel.repaint();
+    }
+
     // Handle the key pressed
     public void handleKeyPress(char keyChar) {
         if (pos >= -1 && pos < 3) {
@@ -93,6 +110,7 @@ public class Mix extends Step {
                 // Wrong key pressed, reset position and show an error image (e.g., index 4)
                 pos = -1;
                 displayImage(4); // display the messed up image
+                displaySequence(0);
                 p_.decreaseLives();
 //                if(p_.getLives()<1){
 //                    if (listener != null) {
@@ -106,14 +124,16 @@ public class Mix extends Step {
             } else {
                 // Correct key pressed, show the corresponding image
                 displayImage(pos); // Show image for the current position
+                if(pos<3) {
+                    displaySequence(pos + 1);
+                }
                 System.out.println("Correct key pressed");
             }
             if (pos == 3) {
                 // Sequence completed successfully
+                p_.incScoreDouble();
                 System.out.println("Win! Current score: " + p_.getScore());
                 pos = -2; // Reset to a state where sequence won't continue
-
-                p_.incScoreDouble();
 
                 if (listener != null) {
                     listener.onGameWin(); // Notify the game to show the next panel

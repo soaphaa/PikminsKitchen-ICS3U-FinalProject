@@ -5,7 +5,7 @@ import java.net.URL;
 public class Bake {
     private JPanel panel, mPanel;
     private Player p_;
-    private FileIO f;
+    private GameEventListener listener;
 
     private String[] imgPath;
     private JLabel[] imgLabel;
@@ -16,26 +16,26 @@ public class Bake {
     private JLabel pbLabel;
 
     private Timer timer; // Progress bar timer
-    int currentValue;    // Current value of progress bar
+    private int currentValue; // Current progress value
 
-    public Bake(JPanel mainPanel, Player player, FileIO file) {
+    public Bake(JPanel mainPanel, Player player, GameEventListener l) {
         this.mPanel = mainPanel;
         this.p_ = player;
-        this.f = file;
+        this.listener = l;
 
         // Paths to cookie state images
         imgPath = new String[]{
-                "images/bake/underCooked.png",
-                "images/bake/good.png",
-                "images/bake/perfect.png",
-                "images/bake/burnt.png",
-                "images/bake/fire.png",
-                "images/bake/baking.png"
+                "images/bake/underCooked.png", // 0
+                "images/bake/good.png",        // 1
+                "images/bake/perfect.png",     // 2
+                "images/bake/burnt.png",       // 3
+                "images/bake/fire.png",        // 4
+                "images/bake/baking.png"       // 5 (default image)
         };
         imgLabel = new JLabel[imgPath.length];
 
         for (int i = 0; i < imgLabel.length; i++) {
-            URL imgUrl = Mix.class.getResource(imgPath[i]);
+            URL imgUrl = Bake.class.getResource(imgPath[i]);
             image = new ImageIcon(imgUrl);
             Image scaledImage = image.getImage().getScaledInstance(500, 500, Image.SCALE_SMOOTH);
             image = new ImageIcon(scaledImage);
@@ -60,7 +60,7 @@ public class Bake {
         panel.setBounds(0, 0, 1000, 800);
         panel.setBackground(Color.decode("#789adb"));
 
-        // Create and configure the progress bar (used for progress value)
+        // Create and configure the progress bar
         pb = new JProgressBar(0, 100);
         pb.setValue(0); // Start with 0% progress
         pb.setStringPainted(false); // Hide default text
@@ -68,7 +68,7 @@ public class Bake {
         pb.setBorder(BorderFactory.createEmptyBorder());
         pb.setOpaque(false); // Transparent background
         pb.setForeground(Color.GREEN); // Set progress color
-        pb.setBounds(125, 700, 750, 25); // Match the size and position of the background image
+        pb.setBounds(125, 700, 750, 25);
 
         // Use JLayeredPane for stacking components
         JLayeredPane layeredPane = new JLayeredPane();
@@ -78,8 +78,7 @@ public class Bake {
         layeredPane.add(pbLabel, JLayeredPane.DEFAULT_LAYER); // Background image on the bottom layer
         layeredPane.add(pb, JLayeredPane.PALETTE_LAYER);     // Progress bar on top layer
 
-
-        displayImage(5); //default image
+        displayImage(5); // Default image (baking)
 
         // Add the layered pane to the panel
         panel.add(layeredPane);
@@ -93,8 +92,10 @@ public class Bake {
     }
 
     public void displayImage(int index) {
-        imgLabel[5].setVisible(false); //set the default image of the oven as false
-        imgLabel[index].setVisible(true); //replace with the cookie state
+        for (JLabel label : imgLabel) {
+            label.setVisible(false); // Hide all images
+        }
+        imgLabel[index].setVisible(true); // Show the selected image
         panel.add(imgLabel[index]);
         mPanel.revalidate();
         mPanel.repaint();
@@ -109,7 +110,11 @@ public class Bake {
                 panel.repaint();                // Repaint the panel
             } else {
                 ((Timer) e.getSource()).stop(); // Stop when progress bar is full
-                displayImage(4); //FAILED
+                displayImage(4); // Show "fire" image (baking failed)
+                p_.decreaseLives(); // Decrease a life
+                if (p_.getLives() == 0) {
+                    listener.onGameLose();
+                }
             }
         });
         timer.start();
@@ -118,47 +123,59 @@ public class Bake {
     public void stopTimer() {
         timer.stop();
         panel.repaint();
-        System.out.println("Timer stopped");
         cookieState();
     }
 
     public void cookieState() {
         if (currentValue > 0) {
             if (currentValue <= 55) {
-                displayImage(0);//undercooked
+                displayImage(0); // Undercooked
                 bakeScore(0);
-            }
-            else if(currentValue>=65 && currentValue <=70){
-                displayImage(2);//perfect
+            } else if (currentValue >= 65 && currentValue <= 70) {
+                displayImage(2); // Perfect
                 bakeScore(2);
-            }
-            else if(currentValue >=81){
-                displayImage(3);//burnt
+            } else if (currentValue >= 81) {
+                displayImage(3); // Burnt
                 bakeScore(3);
-            }
-
-            else{
-                displayImage(1);//good
+            } else {
+                displayImage(1); // Good
                 bakeScore(1);
             }
         }
     }
 
-    public void bakeScore(int imgIndex){
-        switch(imgIndex){
-            case 0: p_.decreaseScore();
-            case 1: p_.incScore();
+    public void bakeScore(int imgIndex) {
+        switch (imgIndex) {
+            case 0: // Undercooked
+                p_.decreaseScore();
                 break;
-            case 2: p_.incScoreDouble();
-            case 3: p_.decreaseScore();
-            case 4: p_.setScore(0);
+            case 1: // Good
+                p_.incScore(50);
+                break;
+            case 2: // Perfect
+                p_.incScore(100);
+                break;
+            case 3: // Burnt
+                p_.decreaseScore();
+                break;
+            case 4: // Failed completely
+                p_.setScore(0);
+                break;
         }
-        f.saveScore(p_);
+
+        // Update and save the high score if applicable
+        p_.updateHighScore();
+
+        // Check if lives are exhausted
+        if (p_.getLives() == 0) {
+            listener.onGameLose();
+        } else {
+            listener.onGameWin();
+        }
     }
 
-    //start the game timer
     public void start() {
-        timer.start();
-        pb.setValue(0); // Start with 0% progress
+        pb.setValue(0); // Reset progress bar
+        timer.start();  // Start the baking process
     }
 }
